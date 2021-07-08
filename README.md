@@ -46,10 +46,10 @@ OPTIONS
 
 EXAMPLE
   $ cli-core hello
-  hello world from ./src/hello.ts!
+  hello world from ./src/OrderFor.ts!
 ```
 
-_See code: [src/commands/hello.ts](https://github.com/hectorvp/cli-core/blob/v0.1.0/src/commands/hello.ts)_
+_See code: [src/commands/OrderFor.ts](https://github.com/hectorvp/cli-core/blob/v0.1.0/src/commands/hello.ts)_
 
 ## `cli-core help [COMMAND]`
 

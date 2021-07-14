@@ -42,5 +42,4 @@ export abstract class BaseCommand extends Command {
     }
     this.log('Command to repeat: run ' + command + argsT + flagT)
   }
-
 }

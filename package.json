@@ -50,13 +50,15 @@
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
-    "version": "oclif-dev readme && git add README.md"
+    "version": "oclif-dev readme && git add README.md",
+    "watch": "tsc -w --noEmitOnError"
   },
   "types": "lib/index.d.ts",
   "dependencies": {
     "@oclif/command": "^1.8.0",
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-help": "^3.2.2",
+    "chalk": "^4.1.1",
     "cli-progress": "^3.9.0",
     "cli-table": "^0.3.6",
     "debug": "^4.3.1",

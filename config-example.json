@@ -1,0 +1,19 @@
+{
+  "version": "1.1",
+  "defaultProfile": "default_1",
+  "clientID":"9548b4e1-1463-461f-9060-e811b8dd9596",
+  "profiles": [
+    {
+      "name": "default_1",
+      "org": "acme",
+      "region": "us",       
+      "OAuthTokenExpTime": 1626686476000
+    },
+    {
+      "name": "default_2",
+      "org": "acme",
+      "region": "eu",       
+      "OAuthTokenExpTime": 1626686476000
+    }
+  ]
+}

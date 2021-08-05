@@ -6,6 +6,8 @@ import { Logger } from './log';
 
 const CONFIG_FILE_NAME = 'config.json';
 
+let configDir = '';
+
 let userConfig: Config;
 
 export class Config implements UserConfig {
@@ -20,7 +22,7 @@ export class Config implements UserConfig {
   // Question: Should we replace profile if found duplicate or throw error?
   addProfile(profile: Profile, secrets: ProfileSecrets) {
     this.profiles.push(profile);
-    secureStore.insertOrUpdateSecrets(profile.name, secrets);
+    secureStore.saveProfileSecrets(profile.name, secrets);
   }
 
   getProfile(name?: string) {
@@ -34,20 +36,20 @@ export class Config implements UserConfig {
       Logger.error('Cannot remove default profile');
     }
     this.profiles = this.profiles.filter((p: Profile) => p.name != name);
-    secureStore.removeSecrets(name);
+    secureStore.removeProfileSecrets(name);
   }
 }
 
 export class ConfigManager {
   filePath: string;
 
-  constructor(configDir: string) {
+  constructor() {
     this.filePath = path.join(configDir, CONFIG_FILE_NAME);
   }
 
   save(config?: UserConfig) {
     if (!config && !userConfig) {
-      return;
+      Logger.error('Configuration was not loaded to save');
     }
     fs.outputJSONSync(this.filePath, config || userConfig, {
       spaces: '\t',
@@ -55,7 +57,13 @@ export class ConfigManager {
   }
 
   private load() {
-    let dataObj = fs.readJSONSync(this.filePath);
+    let dataObj;
+    try {
+      dataObj = fs.readJSONSync(this.filePath);
+    } catch (err) {
+      Logger.error('Could not find config file, try initializing CLI');
+    }
+
     return new Config(
       dataObj.clientID || '',
       dataObj.version || '',
@@ -77,4 +85,8 @@ export class ConfigManager {
     userConfig = this.load();
     return userConfig;
   }
+}
+
+export function setConfigDir(configDirPath: string) {
+  configDir = configDirPath;
 }

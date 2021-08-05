@@ -2,41 +2,60 @@
 
 export async function prompt(question: string, type: 'input' | 'password' = 'input', answer?: string) {
   if (!answer && answer !== '') {
-    const {prompt} = require('enquirer');
-    let re = await prompt({type: type, name: 'result', message: question});
+    const { prompt } = require('enquirer');
+    let re = await prompt({ type: type, name: 'result', message: question });
     return re.result;
   } else {
-    console.log('Using answer (' + answer + ') for question: ' + question)
+    console.log('Using answer (' + answer + ') for question: ' + question);
     return answer;
   }
 }
 
 export async function promptChoices(question: string, choices: any[], answer?: string) {
   if (!answer && answer !== '') {
-    const {Select} = require('enquirer');
+    const { Select } = require('enquirer');
     const prompt = new Select({
       message: question,
       choices: choices,
-      limit: 5,
+      limit: 7,
     });
     return await prompt.run();
   } else {
-    console.log('Using answer (' + answer + ') for question: ' + question)
+    console.log('Using answer (' + answer + ') for question: ' + question);
     return answer;
   }
 }
 
 export async function promptChoicesWithSearch(question: string, choices: any[], answer?: string) {
   if (!answer && answer !== '') {
-    const {AutoComplete} = require('enquirer');
+    const { AutoComplete } = require('enquirer');
     const prompt = new AutoComplete({
       message: question,
       choices: choices,
-      limit: 5,
+      limit: 7,
     });
     return await prompt.run();
   } else {
-    console.log('Using answer (' + answer + ') for question: ' + question)
+    console.log('Using answer (' + answer + ') for question: ' + question);
+    return answer;
+  }
+}
+
+export async function promptMultiSelectChoices(
+  question: string,
+  choices: string[] | number[],
+  answer?: string[] | number[]
+) {
+  if (!answer) {
+    const { MultiSelect } = require('enquirer');
+    const prompt = new MultiSelect({
+      message: question,
+      choices: choices,
+      limit: 7,
+    });
+    return await prompt.run();
+  } else {
+    console.log('Using answer (' + answer + ') for question: ' + question);
     return answer;
   }
 }

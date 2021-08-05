@@ -1,6 +1,8 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import * as url from 'url';
-import { Profile } from '../models/models';
+import { ConfigManager } from '..';
+import { HTTPResponse, Profile } from '../models/models';
+import { Logger } from './log';
 import { secureStore } from './secure-store';
 const pkg = require('../../package.json');
 
@@ -54,6 +56,13 @@ class HTTPRequest {
     return axios.create(options);
   }
 
+  /**
+   * Make HTTP Request and get a response
+   * @param url
+   * @param options
+   * @param data
+   * @returns
+   */
   static async doRequest(url: string, options: AxiosRequestConfig = {}, data?: any) {
     let proxy = HTTPRequest.getProxy();
 
@@ -74,7 +83,7 @@ class HTTPRequest {
     };
 
     const responseAxios = await axios(url, options);
-    const response = {} as any;
+    const response = {} as HTTPResponse;
     response.body = '';
     response.statusCode = responseAxios.status;
     response.headers = responseAxios.headers;
@@ -88,20 +97,12 @@ class HTTPRequest {
 }
 
 class TCRequest {
-  profile: Profile;
+  private profile: Profile;
+  private clientId: string;
 
-  constructor(profile: Profile) {
+  constructor(profile: Profile, clientId: string) {
     this.profile = profile;
-  }
-
-  private getBaseURL() {
-    let prefix = '';
-
-    if (this.profile.region != 'us') {
-      prefix = this.profile.region + '.';
-    }
-
-    return 'https://' + prefix + 'api.cloud.tibco.com';
+    this.clientId = clientId;
   }
 
   private addRegionToURL(url: string) {
@@ -113,16 +114,55 @@ class TCRequest {
     return u.href;
   }
 
+  private async renewToken() {
+    let rt = await secureStore.getProfileSecrets(this.profile.name, 'refreshToken');
+    let cs = await secureStore.getClientSecret();
+    if (!cs) {
+      Logger.error('Could not find client secret');
+    }
+
+    let formURLEncodedData = `refresh_token=${rt}&grant_type=refresh_token`;
+
+    let basicAuth = {
+      username: this.clientId,
+      password: cs as string,
+    };
+
+    let response = await HTTPRequest.doRequest(
+      '/idm/v1/oauth2/token',
+      { method: 'POST', baseURL: DEFAULT_BASE_URL, auth: basicAuth },
+      formURLEncodedData
+    );
+
+    if (response.statusCode < 200 || response.statusCode > 299) {
+      Logger.error('Failed to renew token\n' + response.body);
+    }
+
+    this.profile.OAuthTokenExpTime = new Date().getTime() + response.body.expires_in * 1000;
+
+    // Make asynchronous
+    new ConfigManager().save();
+
+    secureStore.saveProfileSecrets(this.profile.name, {
+      refreshToken: response.body.refresh_token,
+      accessToken: response.body.accessToken,
+    });
+
+    return response.body.access_token;
+  }
+
   // TODO: Error handling
-  // TODO: Check token expiry & refresh token
   private async getToken() {
-    let tokens = await secureStore.getSecrets(this.profile.name);
+    if (this.profile.OAuthTokenExpTime < new Date().getTime()) {
+      return await this.renewToken();
+    }
+    let tokens = await secureStore.getProfileSecrets(this.profile.name);
     if (tokens) return tokens.accessToken;
   }
 
   async getAxiosClient(baseURL?: string) {
     let client = HTTPRequest.getAxiosClient();
-    client.defaults.baseURL = baseURL ? this.addRegionToURL(baseURL) : this.getBaseURL();
+    client.defaults.baseURL = baseURL ? this.addRegionToURL(baseURL) : this.addRegionToURL(DEFAULT_BASE_URL);
     client.defaults.headers['Authorization'] = 'Bearer ' + (await this.getToken());
     return client;
   }
@@ -136,6 +176,13 @@ class TCRequest {
     return true;
   }
 
+  /**
+   * Make HTTP Request to TIBCO Cloud and get a response
+   * @param url
+   * @param options
+   * @param data
+   * @returns
+   */
   async doRequest(url: string, options: AxiosRequestConfig = {}, data?: any) {
     options.headers = options.headers || {};
     options.headers['Authorization'] = 'Bearer ' + (await this.getToken());

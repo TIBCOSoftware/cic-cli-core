@@ -17,4 +17,10 @@ export interface UserConfig {
   clientID: string;
 }
 
+export interface HTTPResponse {
+  body: any;
+  statusCode: number | string;
+  headers: any;
+}
+
 export type region = 'us' | 'eu' | 'au';

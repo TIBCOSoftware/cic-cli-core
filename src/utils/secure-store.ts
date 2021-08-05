@@ -1,9 +1,12 @@
 import * as keytar from 'keytar';
+import { BaseCommand } from '..';
 import { ProfileSecrets } from '../models/models';
+import { Logger } from './log';
 
 const SERVICE = 'tibco-cli';
+const ACCOUNT = 'tibco-cli';
 
-async function getSecrets(profName: string, secretType?: keyof ProfileSecrets) {
+async function getProfileSecrets(profName: string, secretType?: keyof ProfileSecrets) {
   let secrets = await keytar.getPassword(SERVICE, profName);
 
   if (!secrets) {
@@ -18,8 +21,16 @@ async function getSecrets(profName: string, secretType?: keyof ProfileSecrets) {
   return secretsObj;
 }
 
-async function insertOrUpdateSecrets(profName: string, secrets: ProfileSecrets) {
-  let currSecrets = await getSecrets(profName);
+async function getClientSecret() {
+  return await keytar.getPassword(SERVICE, ACCOUNT);
+}
+
+async function saveClientSecret(clientSecret: string) {
+  return await keytar.setPassword(SERVICE, ACCOUNT, clientSecret);
+}
+
+async function saveProfileSecrets(profName: string, secrets: ProfileSecrets) {
+  let currSecrets = await getProfileSecrets(profName);
   let newSecrets;
 
   if (typeof currSecrets === 'object') {
@@ -31,8 +42,19 @@ async function insertOrUpdateSecrets(profName: string, secrets: ProfileSecrets) 
   await keytar.setPassword(SERVICE, profName, JSON.stringify(newSecrets));
 }
 
-async function removeSecrets(profName: string) {
-  return await keytar.deletePassword(SERVICE, profName);
+async function removeProfileSecrets(profile: string) {
+  return await keytar.deletePassword(SERVICE, profile);
 }
 
-export const secureStore = { getSecrets, insertOrUpdateSecrets, removeSecrets };
+async function removeClientSecret() {
+  return await keytar.deletePassword(SERVICE, ACCOUNT);
+}
+
+export const secureStore = {
+  getProfileSecrets,
+  saveProfileSecrets,
+  getClientSecret,
+  removeProfileSecrets,
+  saveClientSecret,
+  removeClientSecret,
+};

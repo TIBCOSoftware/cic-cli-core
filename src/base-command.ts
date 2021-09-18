@@ -9,13 +9,12 @@ export abstract class BaseCommand extends Command {
   private profileName?: string;
 
   static flags = {
+    profile: flags.string({
+      description: 'Switch to different org or region using profile',
+    }),
     'no-warnings': flags.boolean({
       description: 'Disable warnings from commands outputs',
       default: false,
-    }),
-
-    profile: flags.string({
-      description: 'Switch to different org or region using profile',
     }),
   };
 
@@ -27,7 +26,7 @@ export abstract class BaseCommand extends Command {
     setConfigDir(this.config.configDir);
     let { flags } = this.parse(this.constructor as typeof BaseCommand);
     this.profileName = flags.profile;
-    this.warnings = !flags['no-warnings'];
+    //  this.warnings = !flags['no-warnings'];
   }
 
   getConfig() {

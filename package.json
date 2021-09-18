@@ -7,12 +7,13 @@
   "devDependencies": {
     "@oclif/dev-cli": "^1.26.0",
     "@oclif/test": "^1.2.8",
-    "@types/chai": "^4.2.18",
+    "@types/chai": "^4.2.21",
     "@types/cli-progress": "^3.9.2",
     "@types/fs-extra": "^9.0.12",
-    "@types/luxon": "^1.27.0",
+    "@types/luxon": "^1.27.1",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^15.0.2",
+    "@types/node": "^15.14.9",
+    "@types/progress": "^2.0.5",
     "chai": "^4.3.4",
     "eslint": "^5.16.0",
     "eslint-config-oclif": "^3.1.0",
@@ -21,7 +22,7 @@
     "mocha": "^5.2.0",
     "nyc": "^14.1.1",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.9"
+    "typescript": "^3.9.10"
   },
   "engines": {
     "node": ">=8.0.0"
@@ -58,18 +59,19 @@
   "dependencies": {
     "@oclif/command": "^1.8.0",
     "@oclif/config": "^1.17.0",
-    "@oclif/plugin-help": "^3.2.2",
+    "@oclif/plugin-help": "^3.2.3",
     "axios": "^0.21.1",
-    "chalk": "^4.1.1",
-    "cli-progress": "^3.9.0",
+    "chalk": "^4.1.2",
     "cli-table": "^0.3.6",
-    "debug": "^4.3.1",
+    "debug": "^4.3.2",
     "enquirer": "^2.3.6",
+    "form-data": "^4.0.0",
     "fs-extra": "^10.0.0",
     "keytar": "^7.7.0",
-    "luxon": "^1.27.0",
+    "luxon": "^1.28.0",
     "open": "^8.2.1",
     "ora": "^5.4.1",
+    "progress": "^2.0.3",
     "tslib": "^1.14.1"
   }
 }

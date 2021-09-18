@@ -2,8 +2,13 @@ import axios, { AxiosRequestConfig } from 'axios';
 import * as url from 'url';
 import { ConfigManager } from '..';
 import { HTTPResponse, Profile } from '../models/models';
+import { HTTPError } from './error';
 import { Logger } from './log';
 import { secureStore } from './secure-store';
+import * as fs from 'fs-extra';
+import { Transform } from 'stream';
+import path = require('path');
+import { getProgressBar } from './ux/progress';
 const pkg = require('../../package.json');
 
 const DEFAULT_BASE_URL = 'https://api.cloud.tibco.com';
@@ -35,35 +40,11 @@ class HTTPRequest {
   }
 
   static getAxiosClient() {
-    let options: AxiosRequestConfig = {};
-
-    let proxy = HTTPRequest.getProxy();
-    if (proxy) {
-      options.proxy = proxy;
-    }
-
-    options.headers = {
-      'User-Agent': pkg.name + '/' + pkg.version,
-      Connection: 'close',
-    };
-
-    options.timeout = 30000;
-
-    options.validateStatus = (status: any) => {
-      return true;
-    };
-
+    let options = HTTPRequest.addHttpOptions();
     return axios.create(options);
   }
 
-  /**
-   * Make HTTP Request and get a response
-   * @param url
-   * @param options
-   * @param data
-   * @returns
-   */
-  static async doRequest(url: string, options: AxiosRequestConfig = {}, data?: any) {
+  static addHttpOptions(options: AxiosRequestConfig = {}) {
     let proxy = HTTPRequest.getProxy();
 
     if (proxy) {
@@ -74,25 +55,147 @@ class HTTPRequest {
     options.headers['User-Agent'] = pkg.name + '/' + pkg.version;
     options.headers.Connection = options.headers.Connection || 'close';
 
-    if (data) {
-      options.data = data;
-    }
+    options.timeout = 30000;
 
     options.validateStatus = () => {
       return true;
     };
 
+    return options;
+  }
+
+  /**
+   * Make HTTP Request and get a response
+   * @param url
+   * @param options
+   * @param data
+   * @returns
+   */
+  static async doRequest(url: string, options: AxiosRequestConfig = {}, data?: any) {
+    options = HTTPRequest.addHttpOptions(options);
+
+    if (data) {
+      options.data = data;
+    }
+
     const responseAxios = await axios(url, options);
+    if (responseAxios.status < 200 || responseAxios.status > 299) {
+      throw new HTTPError(`Failed to call ${url}`, responseAxios.status, responseAxios.data, responseAxios.headers);
+    }
+
     const response = {} as HTTPResponse;
     response.body = '';
     response.statusCode = responseAxios.status;
     response.headers = responseAxios.headers;
-    try {
-      response.body = JSON.parse(responseAxios.data);
-    } catch (e) {
-      response.body = responseAxios.data;
-    }
+    response.body = responseAxios.data;
+
     return response;
+  }
+
+  static async download(
+    url: string,
+    pathToStore: string,
+    showProgressBar: boolean = true,
+    options: AxiosRequestConfig = {}
+  ) {
+    return new Promise(async (resolve, reject) => {
+      let stream = fs.createWriteStream(pathToStore);
+      let len = 0;
+      let bar: any;
+
+      options.responseType = 'stream';
+      options.maxContentLength = options.maxContentLength || Infinity;
+      let response = await HTTPRequest.doRequest(url, options);
+      let totalLen = response.headers['content-length'];
+
+      if (showProgressBar) {
+        let getProgressBar = (await import('./ux/index')).ux.getProgressBar;
+        bar = await getProgressBar(`:bar :percent | :currLen/${HTTPRequest.readableSize(totalLen)}`, totalLen);
+      }
+
+      response.body.pipe(stream);
+
+      if (showProgressBar) {
+        response.body.on('data', (chunk: any) => {
+          len = len + chunk.length;
+          bar.tick(chunk.length, { currLen: HTTPRequest.readableSize(len).split(' ')[0] });
+        });
+      }
+
+      stream.on('error', (err: any) => {
+        stream.close();
+        reject(err);
+      });
+
+      stream.on('finish', () => {
+        resolve(true);
+      });
+    });
+  }
+
+  static async upload(
+    url: string,
+    data: { [key: string]: string },
+    options: AxiosRequestConfig = {},
+    showProgressBar: boolean = true
+  ) {
+    const FD = await import('form-data');
+    let formData = new FD();
+    let bar: any;
+
+    let totalBytes = 0;
+    let totalUploadedBytes = 0;
+
+    for (let i in data) {
+      if ((await fs.pathExists(data[i])) === true) {
+        totalBytes += fs.statSync(data[i]).size;
+        let fName = path.basename(data[i]);
+        let readStream = fs.createReadStream(data[i]);
+
+        // Intermediate stream
+        let uploadStream = new Transform({
+          transform: (chunk, encoding, callback) => {
+            totalUploadedBytes += chunk.length;
+            bar.tick(chunk.length, { uploadedBytes: HTTPRequest.readableSize(totalUploadedBytes).split(' ')[0] });
+            callback(undefined, chunk);
+          },
+        });
+
+        readStream.pipe(uploadStream);
+
+        formData.append(i, uploadStream, { knownLength: fs.statSync(data[i]).size, filename: fName });
+      } else {
+        formData.append(i, data[i]);
+      }
+    }
+
+    if (showProgressBar) {
+      bar = await getProgressBar(`:bar :percent | :uploadedBytes/${HTTPRequest.readableSize(totalBytes)} `, totalBytes);
+    }
+
+    options.method = options.method || 'POST';
+    options.headers = { ...options.headers, ...formData.getHeaders() };
+    options.maxBodyLength = options.maxBodyLength || Infinity;
+    return HTTPRequest.doRequest(url, options, formData);
+  }
+
+  private static readableSize(sizeBytes: number) {
+    if (sizeBytes < 1024) {
+      return sizeBytes + ' Bytes';
+    } else {
+      const fsKb = Math.round((sizeBytes / 1024) * 100) / 100;
+      if (fsKb < 1024) {
+        return fsKb + ' KB';
+      } else {
+        const fsMb = Math.round((fsKb / 1024) * 100) / 100;
+        if (fsMb < 1024) {
+          return fsMb + ' MB';
+        } else {
+          const fsGb = Math.round((fsMb / 1024) * 100) / 100;
+          return fsGb + ' GB';
+        }
+      }
+    }
   }
 }
 
@@ -117,6 +220,11 @@ class TCRequest {
   private async renewToken() {
     let rt = await secureStore.getProfileSecrets(this.profile.name, 'refreshToken');
     let cs = await secureStore.getClientSecret();
+
+    if (!rt) {
+      Logger.error(`Could not find refresh token for profile ${this.profile.name}`);
+    }
+
     if (!cs) {
       Logger.error('Could not find client secret');
     }
@@ -134,10 +242,6 @@ class TCRequest {
       formURLEncodedData
     );
 
-    if (response.statusCode < 200 || response.statusCode > 299) {
-      Logger.error('Failed to renew token\n' + response.body);
-    }
-
     this.profile.OAuthTokenExpTime = new Date().getTime() + response.body.expires_in * 1000;
 
     // Make asynchronous
@@ -151,7 +255,6 @@ class TCRequest {
     return response.body.access_token;
   }
 
-  // TODO: Error handling
   private async getToken() {
     if (this.profile.OAuthTokenExpTime < new Date().getTime()) {
       return await this.renewToken();
@@ -196,7 +299,20 @@ class TCRequest {
     if (data) {
       options.data = data;
     }
-    return await HTTPRequest.doRequest(url, options);
+    return HTTPRequest.doRequest(url, options);
+  }
+
+  async download(url: string, pathToStore: string, showProgressBar: boolean = true, options: AxiosRequestConfig = {}) {
+    options.headers = options.headers || {};
+    options.headers['Authorization'] = 'Bearer ' + (await this.getToken());
+
+    if (this.isCompleteURL(url)) {
+      url = this.addRegionToURL(url);
+    } else {
+      options.baseURL = this.addRegionToURL(options.baseURL || DEFAULT_BASE_URL);
+    }
+
+    return HTTPRequest.download(url, pathToStore, showProgressBar, options);
   }
 }
 

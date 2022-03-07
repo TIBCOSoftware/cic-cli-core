@@ -1,0 +1,6 @@
+{
+    "URLS":{
+        "DEFAULT_REQUEST_URL": "https://api.cloud.tibco.com",
+        "REFRESH_TOKEN_URL": "https://account.cloud.tibco.com"
+    }
+}

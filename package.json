@@ -1,7 +1,7 @@
 {
   "name": "@tibco-software/cic-cli-core",
   "description": "Core library for TIBCO cloud CLI",
-  "version": "1.0.0-beta",
+  "version": "1.0.0-beta.1",
   "author": "TIBCO Software",
   "bugs": "https://github.com/TIBCOSoftware/cic-cli-core/issues",
   "devDependencies": {

@@ -4,6 +4,7 @@ If you want to develop a CLI plugin for TIBCO Cloud™, use this package to get 
 Using this package won't only give features but will help in maintaining a unified, consistent user experience for the end user.
 
 ## Table of Contents
+
 1. [Get started](#get-started)
 2. [Command Class](#commands)
     1. [BaseCommand](#basecommand)
@@ -20,17 +21,39 @@ Using this package won't only give features but will help in maintaining a unifi
 
 ## Get started
 
-Since this CLI is based on the oclif framework, check out [oclif](https://oclif.io/) and then install it on your machine.
+- Since this CLI is based on the oclif framework, check out [oclif](https://oclif.io/) and then install it on your machine.
 
-Generate the CLI plugin and install this package.
+  ```bash
+  npm install -g oclif@1.18.0
+  ```
 
-```
-oclif plugin <plugin_name>
-cd <plugin_name>
-npm i @tibco-software/cic-cli-core
-```
+- Install [TIBCO Cloud CLI](https://github.com/TIBCOSoftware/cic-cli-main) on your machine.
 
-> **_NOTE:_** The TIBCO Cloud CLI works on oclif 1.18.x version. Please consider using the same version of oclif for developing the plugin
+- Generate the CLI plugin and install CLI core package.
+
+  ```
+  oclif plugin <your plugin name>
+  cd <your plugin name>
+  npm i @tibco-software/cic-cli-core
+  ```
+
+- Create topic (group) for your commands.
+  ```
+  oclif command <Your topic name>:hello
+  ```
+
+- Link your plugin to the TIBCO Cloud CLI.
+  ```
+  tibco plugins:link <absolute path of your plugin>
+  ```
+
+- Test your hello command.
+
+  ```
+  tibco <your topic name>:hello
+  ```
+
+> **_NOTE:_** The TIBCO Cloud CLI works on oclif 1.18.x version. Please consider using the same version of oclif while developing the plugin.
 
 ## Commands
 
@@ -47,9 +70,11 @@ export default class GenDirCommand extends BaseCommand {
 
   static examples = [`tibco fs:gen-dir --path . mydir`];
 
-  static flags = {
-    ...BaseCommand.flags,
-    path: flags.string({
+  static flags: flags.input<any> & typeof BaseCommand.flags = {
+   
+   ...BaseCommand.flags,
+   
+   path: flags.string({
       char: 'p',
       description: 'Path other the cwd',
       required: false,
@@ -97,9 +122,11 @@ export default class ShowAppsCommand extends TCBaseCommand {
 
   static examples = [`tibco tc:show-apps --all`];
 
-  static flags = {
-    ...TCBaseCommand.flags,
-    all: flags.boolean({
+  static flags: flags.input<any> & typeof TCBaseCommand.flags = {
+   
+   ...TCBaseCommand.flags,
+   
+   all: flags.boolean({
       char: 'a',
       description: 'show other owner apps',
       required: false,
@@ -117,7 +144,7 @@ export default class ShowAppsCommand extends TCBaseCommand {
     // to make any http requests to 3rd party tools
     let httpReq = this.getHTTPRequest();
 
-    // to make any http requwts to TIBCO Cloud
+    // to make any http requests to TIBCO Cloud
     let tcReq = this.getTCRequest();
 
     // to read Config
@@ -145,8 +172,7 @@ export default class ShowAppsCommand extends TCBaseCommand {
 Alternatively you can also import Requests module from package
 
 ```ts
-import { HTTPRequest } from '@tibco-software/cic-cli-core';
-import { TCRequest } from '@tibco-software/cic-cli-core';
+import { HTTPRequest, TCRequest } from '@tibco-software/cic-cli-core';
 
 let req = new HTTPRequest('commandName', 'pluginName');
 let tcReq = new TCRequest(profile, 'clientId', 'commandName', 'pluginName');
@@ -183,7 +209,7 @@ debug("My debugging namespace");
 
 ## Error handling
 
-Use `CLIBaseError` class to throw errors. These errors are friendly and won't show a traceback unless debugging is enabled with `DEBUG=*` or `CLI_NAME_DEBUG=1`.
+Use `CLIBaseError` class to throw errors. These errors are friendly and won't show a traceback unless debugging is enabled with env variable `DEBUG=*` or `CLI_NAME_DEBUG=1`.
 
 You can extend `CLIBaseError` class to create more error classes.
 For e.g. we created HTTPError class
@@ -213,8 +239,9 @@ It will add some basic info to http requests -
 - User-Agent header
 - timeout (30s) - If the request takes longer than `timeout`, the request will be aborted.
 - connection (close)
-  Use HTTPRequest class to make requests to any third party tools.\
-  Use TCRequest class while making request to TIBCO Cloud. TCRequest will take care of tokens,renew token when expored, add regions in endpoint based on profile.
+
+Use `HTTPRequest` class to make requests to any third party tools.\
+Use `TCRequest` class while making request to TIBCO Cloud. `TCRequest` will take care of tokens, renew token when expired, add regions in endpoint based on the profile.
 
 Check [axios options](https://github.com/axios/axios#request-config) for options parameter in all request methods
 
@@ -229,21 +256,21 @@ let req = new HTTPRequest('cmdName', 'pluginName');
 
 // doRequest(url, options?, data?)
 let resp = await req.doRequest('https://api.mydomain.com/v1/apps/');  // default GET method
-let resp2 = await req.doRequest('/v1/apps/scale', {baseURL: 'https://api.mydomain.com'},{name:'myapp', count:2}); // default POST method if data parameter passed
-let resp3 = await req.doRequest('https://api.mydomain.com/v1/apps/replace', {method: 'PUT'}, {}); // specify other methods from options method property
+let resp2 = await req.doRequest('/v1/apps/scale', {baseURL: 'https://api.mydomain.com'}, {name:'myapp', count:2}); // default POST method if data parameter passed
+let resp3 = await req.doRequest('https://api.mydomain.com/v1/apps/replace', {method: 'PUT'}, {}); // specify other methods from option's method property
 
 Logger.log(resp.body);
 Logger.log(resp.headers);
 Logger.log(resp.statusCode);
 ```
 
-doRequest will throw error (instance of HTTPError) if response statusCode is in 4xx or 5xx.
+`doRequest` will throw error (instance of `HTTPError`) if response statusCode is in 4xx or 5xx.
 
 #### getAxiosClient
 
 Use this method if you want to make an http request instead of cli-core package making it for you\
-It will return an axios instance with some basic options added to it.\
-For axios instance methods checkout this part of [axios](https://api.mydomain.com/v1/apps/).
+It will return an `axios` instance with some basic options added to it.\
+For `axios` instance methods checkout this part of [`axios methods`](https://www.npmjs.com/package/axios#instance-methods).
 
 ```ts
 let req = new HTTPRequest('cmdName', 'PluginName');
@@ -256,9 +283,10 @@ Logger.log(axiosResp.headers);
 
 #### upload
 
-Use this method to upload files when required Content-Type is multipart/form-data.\
-Pass data parameter in {key: value} format and path of a file as value with a prefix `file://`. \
-You can also show progressbar on terminal by just passing last parameter `true` ot the function.
+Use this method to upload files when required `Content-Type` is `multipart/form-data`.\
+Pass data parameter in `{key: value}` format and path of a file as value with a prefix `file://`. \
+You can also show progress bar on terminal by just passing last parameter `true` to the function. \
+It is recommended to show progress bar when file size more than 64KB.
 
 ```ts
 let req = new HTTPRequest('cmdName', 'PluginName');
@@ -275,7 +303,7 @@ let resp = await req.upload('https://api.mydomain.com/v1/apps/new', data, {}, tr
 #### download
 
 Use this method in case you need to download files.\
-You can also show progressbar on terminal by just passing last parameter `true` ot the function.
+You can also show progress bar on terminal by just passing last parameter `true` ot the function.
 
 ```ts
 let req = new HTTPRequest('cmdName', 'PluginName');
@@ -290,8 +318,9 @@ if (isDownloaded === true) {
 
 ### TCRequest
 
-This module uses HTTPRequest to make calls to TIBCO Cloud AND it takes care of tokens, renews them if expired before making a call. It also adds region to the endpoint based on current profile of the end user.  
-https://api.cloud.tibco.com is considered as a base URL when only path is passed to the url parameter of functions.
+This module uses `HTTPRequest` to make calls to TIBCO Cloud.   
+It takes care of tokens, renews them if expired before making a call. It also adds region to the endpoint based on current profile of the end user.  
+[`https://api.cloud.tibco.com`](https://api.cloud.tibco.com) is considered as a base URL when only path is passed to the url parameter of functions.
 
 #### doRequest
 

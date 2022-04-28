@@ -10,19 +10,20 @@ import { expect, test } from '@oclif/test';
 import * as sinon from 'sinon';
 import * as fs from 'fs-extra';
 import * as tmp from 'tmp';
-import path = require('path');
+import * as path from 'path';
 import { setCommand } from '../../src/utils/log';
 
 describe('utils', () => {
-  describe('config', () => {
-    describe('Config Manager', () => {
+  describe('profiles', () => {
+    describe('ProfileConfig Manager', () => {
       test.it('create & save config data in a file when file does not exist', () => {
         let dir = tmp.dirSync({ unsafeCleanup: true });
+        console.log(dir.name);
         let configManager = new ProfileConfigManager(dir.name);
         let config = new ProfileConfig('cid', '1.0.0', 'default_user', []);
         configManager.save(config);
-        expect(fs.existsSync(path.join(dir.name, 'config.json'))).to.equal(true);
-        expect(fs.readJsonSync(path.join(dir.name, 'config.json'))).to.deep.equal(config);
+        expect(fs.existsSync(path.join(dir.name, 'profile.json'))).to.equal(true);
+        expect(fs.readJsonSync(path.join(dir.name, 'profile.json'))).to.deep.equal(config);
       });
       test.it('should give error when saving a null/unloaded config', () => {
         let dir = tmp.dirSync({ unsafeCleanup: true });
@@ -30,7 +31,7 @@ describe('utils', () => {
         expect(configManager.save).to.throw(Error);
       });
 
-      describe('ConfigManager.load', () => {
+      describe('ProfileConfigManager.load', () => {
         let config: any, configManager: ProfileConfigManager, dir: tmp.DirResult;
 
         before(() => {
@@ -57,8 +58,8 @@ describe('utils', () => {
       });
     });
 
-    describe('User Config', () => {
-      describe('Config.addProfile', () => {
+    describe('Profile Config', () => {
+      describe('ProfileConfig.addProfile', () => {
         let command: any;
         let secureStoreStub: any;
         let secrets: any;

@@ -5,15 +5,18 @@
  */
 import { expect } from '@oclif/test';
 import * as chai from 'chai';
+import * as sinon from 'sinon';
+const MD5String = require('../helper/MD5String');
+import * as multipart from 'parse-multipart-data';
 import * as chaiAsPromised from 'chai-as-promised';
 import { HTTPError } from '../../src/index';
 import * as nock from 'nock';
-import { HTTPRequest } from '../../src/utils/request';
+import { HTTPRequest, TCRequest } from '../../src/utils/request';
 import * as tmp from 'tmp';
 import * as md5 from 'md5-file';
 import * as os from 'os';
 
-import path = require('path');
+import * as path from 'path';
 chai.use(chaiAsPromised);
 let testUrl = 'http://www.myapi.com';
 describe('utils', () => {
@@ -107,15 +110,30 @@ describe('utils', () => {
         nock(testUrl)
           .post('/v1/file')
           .reply(function (u, body) {
-            return [201];
+            let boundary = this.req.headers['content-type'].split('boundary=')[1];
+
+            let parts = multipart.parse(Buffer.from(body as string, 'utf-8'), boundary);
+
+            if (parts[0].name === 'file' && parts[0].data.toString() === 'ok') {
+              return [201];
+            }
+
+            if (
+              MD5String(parts[1].data.toString()) === md5.sync(path.join(__dirname, './sample-data.json')) &&
+              parts[1].name === 'path'
+            ) {
+              return [201];
+            }
+            return [400];
           });
         let req = new HTTPRequest();
         let resp = await req.upload(
           '/v1/file',
-          { file: 'ok', path: path.join(__dirname, 'vp.json') },
+          { file: 'ok', path: 'file://' + path.join(__dirname, './sample-data.json') },
           { baseURL: testUrl },
           false
         );
+        expect(resp.statusCode).to.be.equal(201);
       });
     });
 
@@ -126,6 +144,57 @@ describe('utils', () => {
         expect(options).to.have.all.keys('timeout', 'headers', 'validateStatus');
         expect(options).to.have.nested.property('headers.Connection', 'close');
         expect(options).to.have.nested.property('headers.User-Agent');
+      });
+    });
+  });
+
+  describe('TIBCO Cloud HTTP Requests', () => {
+    describe('getUrlAndOptions', () => {
+      it('Add region to the url and token to the header', async () => {
+        let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, '');
+        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+
+        let { newURL, newOptions } = await req.getUrlAndOptions('https://api.cloud.tibco.com', {});
+        expect(newURL).to.be.equal('https://eu.api.cloud.tibco.com/');
+        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
+      });
+      it('Add region to the baseUrl and token to the header', async () => {
+        let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, '');
+        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+
+        let { newURL, newOptions } = await req.getUrlAndOptions('/v1/tci/apps', {
+          baseURL: 'https://api.cloud.tibco.com/',
+        });
+        expect(newURL).to.be.equal('/v1/tci/apps');
+        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
+        expect(newOptions.baseURL).to.be.equal('https://eu.api.cloud.tibco.com/');
+      });
+      it('should not add region to the baseUrl if the region is "us"', async () => {
+        let req = new TCRequest({ name: 'test', org: 'acme', region: 'us' }, '');
+        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+
+        let { newURL, newOptions } = await req.getUrlAndOptions('/v1/tci/apps', {
+          baseURL: 'https://api.cloud.tibco.com/',
+        });
+        expect(newURL).to.be.equal('/v1/tci/apps');
+        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
+        expect(newOptions.baseURL).to.be.equal('https://api.cloud.tibco.com/');
+      });
+      it('should not add region to the url if the region is "us"', async () => {
+        let req = new TCRequest({ name: 'test', org: 'acme', region: 'us' }, '');
+        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+
+        let { newURL, newOptions } = await req.getUrlAndOptions('https://api.cloud.tibco.com/', {});
+        expect(newURL).to.be.equal('https://api.cloud.tibco.com/');
+        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
+      });
+      it('should add baseUrl if only path is passed as parameters', async () => {
+        let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, '');
+        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+
+        let { newURL, newOptions } = await req.getUrlAndOptions('/v1/tci/apps', {});
+        expect(newOptions.baseURL).to.be.equal('https://eu.api.cloud.tibco.com/');
+        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
       });
     });
   });

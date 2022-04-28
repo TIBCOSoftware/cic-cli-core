@@ -192,6 +192,7 @@ class HTTPRequest {
     for (let i in data) {
       if (data[i].trim().startsWith('file://')) {
         let fPath = data[i].trim().split('file://')[1];
+
         if (!fs.pathExistsSync(fPath)) {
           throw new Error(`Invalid file path`);
         }
@@ -243,6 +244,7 @@ class HTTPRequest {
     }
   }
 }
+
 /**
  * Use this class to make requests to TIBCO cloud.
  * It will add token to the authorisation header before  making request.
@@ -364,15 +366,8 @@ class TCRequest {
    * @returns Provides response for HTTP Request
    */
   async doRequest(url: string, options: AxiosRequestConfig = {}, data?: any) {
-    options.headers = options.headers || {};
-    options.headers['Authorization'] = 'Bearer ' + (await this.getValidToken());
-
-    if (this.isCompleteURL(url)) {
-      url = this.addRegionToURL(url);
-    } else {
-      options.baseURL = this.addRegionToURL(options.baseURL || DEFAULT_BASE_URL);
-    }
-    return this.httpRequest.doRequest(url, options, data);
+    let { newURL, newOptions } = await this.getUrlAndOptions(url, options);
+    return this.httpRequest.doRequest(newURL, newOptions, data);
   }
 
   /**
@@ -384,33 +379,42 @@ class TCRequest {
    * @returns true if file downloaded succesfully else will throw some error
    */
   async download(url: string, pathToStore: string, options: AxiosRequestConfig = {}, showProgressBar = true) {
-    options.headers = options.headers || {};
-    options.headers['Authorization'] = 'Bearer ' + (await this.getValidToken());
-
-    if (this.isCompleteURL(url)) {
-      url = this.addRegionToURL(url);
-    } else {
-      options.baseURL = this.addRegionToURL(options.baseURL || DEFAULT_BASE_URL);
-    }
-
-    return this.httpRequest.download(url, pathToStore, options, showProgressBar);
+    let { newURL, newOptions } = await this.getUrlAndOptions(url, options);
+    return this.httpRequest.download(newURL, pathToStore, newOptions, showProgressBar);
   }
 
+  /**
+   * Uploads file to a url
+   * @param url Url where file to be uploaded
+   * @param data Multipart form data in simple \{key: value\} format
+   * @param options HTTP options
+   * @param showProgressBar To show progress bar on terminal
+   * @returns HTTP response
+   */
   async upload(
     url: string,
     data?: { [key: string]: string },
     options: AxiosRequestConfig = {},
     showProgressBar = false
   ) {
+    let { newURL, newOptions } = await this.getUrlAndOptions(url, options);
+    return this.httpRequest.upload(newURL, data, newOptions, showProgressBar);
+  }
+
+  async getUrlAndOptions(url: string, options: AxiosRequestConfig) {
     options.headers = options.headers || {};
-    options.headers['Authorization'] = 'Bearer ' + (await this.getValidToken());
+
+    if (!options.headers['Authorization']) {
+      options.headers['Authorization'] = 'Bearer ' + (await this.getValidToken());
+    }
 
     if (this.isCompleteURL(url)) {
       url = this.addRegionToURL(url);
     } else {
       options.baseURL = this.addRegionToURL(options.baseURL || DEFAULT_BASE_URL);
     }
-    return this.httpRequest.upload(url, data, options, showProgressBar);
+
+    return { newURL: url, newOptions: options };
   }
 }
 

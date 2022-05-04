@@ -21,7 +21,7 @@ Using this package won't only give features but will help in maintaining a unifi
 
 ## Get started
 
-- Since this CLI is based on the oclif framework, check out [oclif](https://oclif.io/) and then install it on your machine.
+- This CLI is based on oclif framework, you will first need to install [oclif](https://oclif.io/) framework on your machine.
 
   ```bash
   npm install -g oclif@1.18.0
@@ -59,7 +59,7 @@ Using this package won't only give features but will help in maintaining a unifi
 
 ### BaseCommand
 
-Extend this class when you want to create any command which does something on the machine locally or when you want to communicate with third party tools. (Not TIBCO Cloud)
+Extend this class when you want to create any command which is executed on the machine locally or when you want to communicate with third party tools.
 
 ```ts
 import { flags } from '@oclif/command';

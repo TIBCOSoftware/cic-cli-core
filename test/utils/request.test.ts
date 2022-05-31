@@ -156,7 +156,7 @@ describe('utils', () => {
 
         let { newURL, newOptions } = await req.getUrlAndOptions('https://api.cloud.tibco.com', {});
         expect(newURL).to.be.equal('https://eu.api.cloud.tibco.com/');
-        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
+        expect(newOptions?.headers?.Authorization).to.be.equal('Bearer rt.asdf');
       });
       it('Add region to the baseUrl and token to the header', async () => {
         let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, '');
@@ -166,7 +166,7 @@ describe('utils', () => {
           baseURL: 'https://api.cloud.tibco.com/',
         });
         expect(newURL).to.be.equal('/v1/tci/apps');
-        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
+        expect(newOptions?.headers?.Authorization).to.be.equal('Bearer rt.asdf');
         expect(newOptions.baseURL).to.be.equal('https://eu.api.cloud.tibco.com/');
       });
       it('should not add region to the baseUrl if the region is "us"', async () => {
@@ -177,7 +177,7 @@ describe('utils', () => {
           baseURL: 'https://api.cloud.tibco.com/',
         });
         expect(newURL).to.be.equal('/v1/tci/apps');
-        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
+        expect(newOptions?.headers?.Authorization).to.be.equal('Bearer rt.asdf');
         expect(newOptions.baseURL).to.be.equal('https://api.cloud.tibco.com/');
       });
       it('should not add region to the url if the region is "us"', async () => {
@@ -186,7 +186,7 @@ describe('utils', () => {
 
         let { newURL, newOptions } = await req.getUrlAndOptions('https://api.cloud.tibco.com/', {});
         expect(newURL).to.be.equal('https://api.cloud.tibco.com/');
-        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
+        expect(newOptions?.headers?.Authorization).to.be.equal('Bearer rt.asdf');
       });
       it('should add baseUrl if only path is passed as parameters', async () => {
         let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, '');
@@ -194,7 +194,7 @@ describe('utils', () => {
 
         let { newURL, newOptions } = await req.getUrlAndOptions('/v1/tci/apps', {});
         expect(newOptions.baseURL).to.be.equal('https://eu.api.cloud.tibco.com/');
-        expect(newOptions.headers.Authorization).to.be.equal('Bearer rt.asdf');
+        expect(newOptions?.headers?.Authorization).to.be.equal('Bearer rt.asdf');
       });
     });
   });

@@ -1,6 +1,9 @@
 {
-    "URLS":{
-        "DEFAULT_REQUEST_URL": "https://api.cloud.tibco.com",
-        "REFRESH_TOKEN_URL": "https://account.cloud.tibco.com"
+    "HOSTS":{
+        "REQUEST_APIS": "https://api.cloud.tibco.com",
+        "TIBCO_ACC": "https://account.cloud.tibco.com"
+    },
+    "PATHS":{
+        "REVOKE_TOKEN":"/idm/v1/oauth2/tokens/operations/revoke"
     }
 }

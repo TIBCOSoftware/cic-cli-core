@@ -4,9 +4,9 @@
  * in the license file that is distributed with this file.
  */
 
-import axios, { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig, AxiosRequestHeaders, HeadersDefaults } from 'axios';
 import * as url from 'url';
-import { HTTPResponse, Profile, ProfileSecrets, region } from '../models/models';
+import { HTTPResponse, Profile, ProfileSecrets } from '../models/models';
 import { HTTPError } from './error';
 import { Logger } from './log';
 import { secureStore } from './secure-store';
@@ -17,8 +17,8 @@ import { CLIBaseError } from '..';
 const pkg = require('../../package.json');
 
 const CORE_CONFIG = require('./../configs-for-core/config.json');
-const DEFAULT_BASE_URL = CORE_CONFIG.URLS.DEFAULT_REQUEST_URL;
-const REFRESH_TOKEN_BASE_URL = CORE_CONFIG.URLS.REFRESH_TOKEN_URL;
+const DEFAULT_BASE_URL = CORE_CONFIG.HOSTS.REQUEST_APIS;
+const REFRESH_TOKEN_BASE_URL = CORE_CONFIG.HOSTS.TIBCO_ACC;
 const REQ_TIMEOUT = 30000;
 
 /**
@@ -345,7 +345,7 @@ class TCRequest {
   async getAxiosClient(baseURL?: string) {
     let client = this.httpRequest.getAxiosClient();
     client.defaults.baseURL = baseURL ? this.addRegionToURL(baseURL) : this.addRegionToURL(DEFAULT_BASE_URL);
-    client.defaults.headers['Authorization'] = 'Bearer ' + (await this.getValidToken());
+    client.defaults.headers.common['Authorization'] = 'Bearer ' + (await this.getValidToken());
     return client;
   }
 

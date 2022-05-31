@@ -4,7 +4,7 @@
  * in the license file that is distributed with this file.
  */
 import { ProfileConfigManager, ProfileConfig } from '../../src/utils/profile';
-import { BaseCommand, CLIBaseError, Profile, secureStore } from '../../src';
+import { BaseCommand, CLIBaseError, HTTPRequest, Profile, secureStore } from '../../src';
 import { expect, test } from '@oclif/test';
 
 import * as sinon from 'sinon';
@@ -17,27 +17,32 @@ describe('utils', () => {
   describe('profiles', () => {
     describe('ProfileConfig Manager', () => {
       test.it('create & save config data in a file when file does not exist', () => {
-        let dir = tmp.dirSync({ unsafeCleanup: true });
-        console.log(dir.name);
+        let dir = tmp.dirSync();
         let configManager = new ProfileConfigManager(dir.name);
         let config = new ProfileConfig('cid', '1.0.0', 'default_user', []);
         configManager.save(config);
         expect(fs.existsSync(path.join(dir.name, 'profile.json'))).to.equal(true);
         expect(fs.readJsonSync(path.join(dir.name, 'profile.json'))).to.deep.equal(config);
+        tmp.setGracefulCleanup();
       });
       test.it('should give error when saving a null/unloaded config', () => {
-        let dir = tmp.dirSync({ unsafeCleanup: true });
+        let dir = tmp.dirSync();
         let configManager = new ProfileConfigManager(dir.name);
         expect(configManager.save).to.throw(Error);
+        tmp.setGracefulCleanup();
       });
 
       describe('ProfileConfigManager.load', () => {
         let config: any, configManager: ProfileConfigManager, dir: tmp.DirResult;
 
         before(() => {
-          dir = tmp.dirSync({ unsafeCleanup: true });
+          dir = tmp.dirSync();
           configManager = new ProfileConfigManager(dir.name);
           config = new ProfileConfig('cid', '1.0.0', 'default_user', []);
+        });
+
+        after(() => {
+          tmp.setGracefulCleanup();
         });
 
         test.it('give error when config file not found', () => {
@@ -127,12 +132,16 @@ describe('utils', () => {
       });
 
       describe('Config.removeProfile', () => {
-        let secureStoreStub: any;
+        let getProfSecStub: any;
+        let removeProfSecStub: any;
+        let HTTPRequestStub: any;
         let config: ProfileConfig;
         let profile1: any;
         let profile2: any;
         before(() => {
-          secureStoreStub = sinon.stub(secureStore, 'removeProfileSecrets');
+          removeProfSecStub = sinon.stub(secureStore, 'removeProfileSecrets').returns(Promise.resolve(true));
+          getProfSecStub = sinon.stub(secureStore, 'getProfileSecrets').returns(Promise.resolve('rt.asdf'));
+          HTTPRequestStub = sinon.stub(HTTPRequest.prototype, 'doRequest');
         });
         beforeEach(() => {
           profile1 = { name: 'eu-user', org: 'acme', region: 'eu' };
@@ -141,23 +150,22 @@ describe('utils', () => {
         });
 
         after(() => {
-          secureStoreStub.restore();
+          HTTPRequestStub.restore();
+          removeProfSecStub.restore();
+          getProfSecStub.restore();
         });
 
-        test.it('remove profile', () => {
-          config.removeProfile('eu-user');
+        test.it('remove profile', async () => {
+          await config.removeProfile('eu-user');
           expect(config.profiles).to.be.deep.equal([profile2]);
         });
 
-        test.it('remove profile which does not exist', () => {
-          config.removeProfile('in-user');
-          expect(config.profiles).to.be.deep.equal([profile1, profile2]);
+        test.it('throw error if profile does not exist', () => {
+          expect(config.removeProfile('in-user')).to.be.rejectedWith(Error);
         });
 
-        test.it('should give error when removing default profile', () => {
-          expect(() => {
-            config.removeProfile('default_user');
-          }).to.throw(Error);
+        test.it('throw error if removing default profile', () => {
+          expect(config.removeProfile('default_user')).to.be.rejectedWith(Error);
         });
       });
     });

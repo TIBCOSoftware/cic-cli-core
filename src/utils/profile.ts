@@ -72,15 +72,18 @@ export class ProfileConfig {
     return profile;
   }
 
-  // TODO: Revoke OAuth token? No
   /**
    * Removes profile from a config
    * @param name name of a profile ot be removed
+   * @returns return a promise, if it is resolved then profile was removed successfully
    */
-  removeProfile(name: string) {
+  async removeProfile(name: string) {
     if (name == this.defaultProfile) {
       throw new CLIBaseError('Cannot remove default profile');
     }
+    this.getProfileByName(name);
+    let token = await secureStore.getProfileSecrets(name, 'accessToken');
+    await this.revokeToken(token);
     this.profiles = this.profiles.filter((p: Profile) => p.name != name);
     secureStore.removeProfileSecrets(name);
   }
@@ -91,6 +94,19 @@ export class ProfileConfig {
       return false;
 
     return true;
+  }
+
+  private async revokeToken(token: string) {
+    const CORE_CONFIG = require('./../configs-for-core/config.json');
+    const REVOKE_TOKEN_URL = CORE_CONFIG.HOSTS.TIBCO_ACC;
+    const REVOKE_TOKEN_PATH = CORE_CONFIG.PATHS.REVOKE_TOKEN;
+    const { HTTPRequest } = await import('./request');
+    let req = new HTTPRequest();
+    await req.doRequest(
+      `${REVOKE_TOKEN_URL}${REVOKE_TOKEN_PATH}`,
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } },
+      `token=${token}`
+    );
   }
 }
 

@@ -70,7 +70,7 @@ export default class GenDirCommand extends BaseCommand {
 
   static examples = [`tibco fs:gen-dir --path . mydir`];
 
-  static flags: flags.input<any> & typeof BaseCommand.flags = {
+  static flags: flags.Input<any> & typeof BaseCommand.flags = {
    
    ...BaseCommand.flags,
    
@@ -122,7 +122,7 @@ export default class ShowAppsCommand extends TCBaseCommand {
 
   static examples = [`tibco tc:show-apps --all`];
 
-  static flags: flags.input<any> & typeof TCBaseCommand.flags = {
+  static flags: flags.Input<any> & typeof TCBaseCommand.flags = {
    
    ...TCBaseCommand.flags,
    

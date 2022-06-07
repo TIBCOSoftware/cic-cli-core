@@ -5,5 +5,9 @@
     },
     "PATHS":{
         "REVOKE_TOKEN":"/idm/v1/oauth2/tokens/operations/revoke"
+    },
+    "CONSTANTS":{
+        "PLUGIN_CONFIG_FILE_NAME":"tibco-cli-config.ini"
     }
+
 }

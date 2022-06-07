@@ -55,7 +55,7 @@
   "repository": "https://github.com/TIBCOSoftware/cic-cli-core",
   "scripts": {
     "prepack": "npm run build",
-    "cpjson": "mkdir ./lib/configs-for-core && cp -R ./src/configs-for-core ./lib",
+    "cpjson": "mkdir -p ./lib/configs-for-core && cp -Rf ./src/configs-for-core ./lib",
     "build": "rm -rf lib && tsc && npm run cpjson && npm run docs",
     "test": "mocha",
     "lint": "eslint . --ext .ts --config .eslintrc",

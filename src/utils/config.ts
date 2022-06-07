@@ -11,7 +11,8 @@ import * as _ from 'lodash';
 
 const debug = require('debug')('@tibco-software/cic-cli-core:config');
 
-export const CONFIG_FILE_NAME = 'config.ini';
+const CORE_CONFIG = require('./../configs-for-core/config.json');
+const CONFIG_FILE_NAME = CORE_CONFIG.CONSTANTS.PLUGIN_CONFIG_FILE_NAME;
 
 export class PluginConfig {
   localConfig: any;
@@ -193,6 +194,7 @@ export class PluginConfig {
     return elements.join('');
   }
 
+  // below function not in use anywhere,it was built for pushing flags from file feature
   getFlagsValue(commandId?: string) {
     if (commandId) {
       let q = `flags.${commandId.split(':').join('.')}`;

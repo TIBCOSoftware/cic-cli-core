@@ -10,6 +10,8 @@ import * as configManager from '../utils/config';
 import * as path from 'path';
 const debug = require('debug')('@tibco-software/cic-cli-core:base-command');
 import * as chalk from 'chalk';
+const CORE_CONFIG = require('./../configs-for-core/config.json');
+const CONFIG_FILE_NAME = CORE_CONFIG.CONSTANTS.PLUGIN_CONFIG_FILE_NAME;
 
 /**
  * Extend this class while developing commands.
@@ -21,11 +23,11 @@ export class BaseCommand extends Command {
 
   static flags = {
     'no-warnings': flags.boolean({
-      description: 'Disable warnings from commands outputs',
+      description: `Disable warnings from command's output`,
       default: false,
     }),
     config: flags.string({
-      description: 'Path to the local config file',
+      description: `Path to the local config file`,
       required: false,
     }),
   };
@@ -35,7 +37,7 @@ export class BaseCommand extends Command {
   }
   async init() {
     setCommand(this);
-    this.pushFlagsFromFile(this.id || this.ctor.id, this.ctor.flags as flags.Input<any>);
+    //  this.pushFlagsFromFile(this.id || this.ctor.id, this.ctor.flags as flags.Input<any>);  Feature disabled
     let { flags } = this.parse(this.constructor as typeof BaseCommand);
     this.localConfigPath = flags.config;
     this.warnings = !flags['no-warnings'];
@@ -58,16 +60,13 @@ export class BaseCommand extends Command {
   }
 
   getPluginConfig() {
-    let localPath = this.localConfigPath || path.join(process.cwd(), configManager.CONFIG_FILE_NAME);
+    let localPath = this.localConfigPath || path.join(process.cwd(), CONFIG_FILE_NAME);
     let cmd = this.ctor.id.split(':'); // e.g: cmdId =  tci:flogo:activity:add-kafka
     let topics = cmd.slice(0, cmd.length - 1); // topics = tci:flogo:activity
-    return configManager.getPluginConfig(
-      path.join(this.config.configDir, configManager.CONFIG_FILE_NAME),
-      localPath,
-      topics
-    );
+    return configManager.getPluginConfig(path.join(this.config.configDir, CONFIG_FILE_NAME), localPath, topics);
   }
 
+  // Feature disabled and function not in use anywhere
   private pushFlagsFromFile(cmdId: string, flagsDefn: flags.Input<any>) {
     if (!flagsDefn) {
       return;
@@ -109,6 +108,7 @@ export class BaseCommand extends Command {
     }
   }
 
+  // Used for pushing flags from a file, this feature is disabled and function is not in use anywhere
   private filterFlagsFromArgv(flag: string, type: 'boolean' | 'option', argv: string[]) {
     let op: string[] = [];
     if (!argv) {

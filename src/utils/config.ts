@@ -14,6 +14,9 @@ const debug = require('debug')('@tibco-software/cic-cli-core:config');
 const CORE_CONFIG = require('./../configs-for-core/config.json');
 const CONFIG_FILE_NAME = CORE_CONFIG.CONSTANTS.PLUGIN_CONFIG_FILE_NAME;
 
+/**
+ * @class Use this class to manage your plugin's configurations.
+ */
 export class PluginConfig {
   localConfig: any;
   globalConfig: any;
@@ -23,6 +26,12 @@ export class PluginConfig {
   localConfigFileExists!: boolean;
   globalConfigFileExists!: boolean;
 
+  /**
+   *
+   * @param globalPath Path to the global config file. That is -> path.join(cmdObj.config.configDir, "tibco-cli-config.ini")
+   * @param localPath Path to the local config file.
+   * @param topics Topics under which currently executing command resides.
+   */
   constructor(globalPath: string, localPath: string, topics?: string[]) {
     this.topics = topics || [];
     this.globalConfigPath = this.genConfigPath(globalPath);
@@ -66,10 +75,12 @@ export class PluginConfig {
   }
 
   /**
-   *
-   * @param property
-   * @param options
-   * @returns
+   * To get a property value from the configuration file.
+   * @param property Property name.
+   * @param options Options object.
+   * @param options.absolutePath  If true, then property's path should be mention from the root section of the config file else just pass the property name.
+   * @param options.source To get a property from local config or global config.
+   * @returns Property value | undefined
    */
   get(
     property: string,
@@ -101,6 +112,15 @@ export class PluginConfig {
     }
   }
 
+  /**
+   * To update or insert property in the config file.
+   * @param property Property name.
+   * @param value Value of the property.
+   * @param options Options object.
+   * @param options.absolutePath  If true, then property's path should be mention from the root section of the config file else just pass the property name.
+   * @param options.source Set a property to local config or global config.
+   * @returns undefined
+   */
   set(property: string, value: any, options: { absolutePath?: boolean; source: 'local' | 'global' }) {
     let jsonPath: string;
 
@@ -117,6 +137,14 @@ export class PluginConfig {
     this.reload();
   }
 
+  /**
+   * To delete a property in the config file.
+   * @param property Property Name.
+   * @param options Options object.
+   * @param options.absolutePath  If true, then property's path should be mention from the root section of the config file else just pass the property name.
+   * @param options.source To delete a property from local config or global config.
+   * @returns undefined
+   */
   delete(property: string, options: { absolutePath?: boolean; source: 'local' | 'global' }) {
     let jsonPath: string;
 
@@ -145,6 +173,9 @@ export class PluginConfig {
     return query;
   }
 
+  /**
+   * Reload local and global config file.
+   */
   reload() {
     this.globalConfig = this.readConfigData(this.globalConfigPath, 'global');
     this.localConfig = this.readConfigData(this.localConfigPath, 'local');
@@ -209,6 +240,13 @@ export class PluginConfig {
 
 let cfg: PluginConfig;
 
+/**
+ * Get instance of {@link PluginConfig} to manage config file properties.
+ * @param globalPath Path where global config file is stored.
+ * @param localPath Path where local config file is stored.
+ * @param topics Topics under which the command resides.
+ * @returns PluginConfig
+ */
 export function getPluginConfig(globalPath: string, localPath: string, topics?: string[]) {
   if (_.isEmpty(cfg)) {
     cfg = new PluginConfig(globalPath, localPath, topics);

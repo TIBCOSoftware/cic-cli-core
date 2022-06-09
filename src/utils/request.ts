@@ -4,7 +4,7 @@
  * in the license file that is distributed with this file.
  */
 
-import axios, { AxiosRequestConfig, AxiosRequestHeaders, HeadersDefaults } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import * as url from 'url';
 import { HTTPResponse, Profile, ProfileSecrets } from '../models/models';
 import { HTTPError } from './error';
@@ -22,13 +22,13 @@ const REFRESH_TOKEN_BASE_URL = CORE_CONFIG.HOSTS.TIBCO_ACC;
 const REQ_TIMEOUT = 30000;
 
 /**
- * Use this class to make any HTTP requests
+ * Use this class to make any HTTP requests.
  */
 class HTTPRequest {
   /**
-   * instantiate HTTPRequest object, parameters are optional
-   * @param commandName command which needs to make HTTP request
-   * @param pluginName plugin to which command belongs
+   * Instantiate HTTPRequest object, parameters are optional.
+   * @param commandName Command which makes an HTTP request.
+   * @param pluginName Plugin to which command belongs.
    */
   constructor(public commandName?: string, public pluginName?: string) {}
 
@@ -60,8 +60,8 @@ class HTTPRequest {
     return axiosProxy;
   }
   /**
-   * Creates Axios client with adding common options
-   * @returns returns Axios client
+   * Creates Axios client with common options.
+   * @returns Axios client.
    */
   getAxiosClient() {
     let options = this.addHttpOptions();
@@ -69,9 +69,9 @@ class HTTPRequest {
   }
 
   /**
-   * Add common options to the AxiosRequestConfig
-   * @param options options object where common options can be added
-   * @returns returns options object
+   * Add common options to the AxiosRequestConfig.
+   * @param options Options object where common options can be added.
+   * @returns  Axios options object
    */
   addHttpOptions(options: AxiosRequestConfig = {}) {
     options.headers = options.headers || {};
@@ -90,11 +90,11 @@ class HTTPRequest {
   }
 
   /**
-   * Make HTTP Request and get a response
-   * @param url Url where to make a request
-   * @param options Options along with request
+   * Make HTTP Request and get a response.
+   * @param url Url where to make a request.
+   * @param options Options along with request.
    * @param data Data to be sent with request. (Note: if data is passed to the function and method not specified then POST method is considered as default)
-   * @returns response of HTTP Request
+   * @returns response of HTTP Request.
    */
   async doRequest(url: string, options: AxiosRequestConfig = {}, data?: any) {
     options = this.addHttpOptions(options);
@@ -127,12 +127,12 @@ class HTTPRequest {
   }
 
   /**
-   * Downloads file from a url
-   * @param url Url from where file needs to be downloaded
-   * @param pathToStore Location where file to be stored
-   * @param options HTTP options
-   * @param showProgressBar To show progress bar on terminal
-   * @returns true if file downloaded succesfully else will throw some error
+   * Downloads file from a url.
+   * @param url Url from where file needs to be downloaded.
+   * @param pathToStore Location where file to be stored.
+   * @param options HTTP options.
+   * @param showProgressBar To show progress bar on terminal.
+   * @returns True if file downloaded succesfully else will throw some error.
    */
   async download(url: string, pathToStore: string, options: AxiosRequestConfig = {}, showProgressBar = false) {
     options.responseType = 'stream';
@@ -172,12 +172,12 @@ class HTTPRequest {
   }
 
   /**
-   * Uploads file to a url
-   * @param url Url where file to be uploaded
-   * @param data Multipart form data in simple \{key: value\} format
-   * @param options HTTP options
-   * @param showProgressBar To show progress bar on terminal
-   * @returns HTTP response
+   * Uploads file to a url.
+   * @param url Url where file to be uploaded.
+   * @param data Multipart form data in simple \{key: value\} format.
+   * @param options HTTP options.
+   * @param showProgressBar To show progress bar on the terminal.
+   * @returns HTTP response.
    */
   async upload(
     url: string,
@@ -246,13 +246,14 @@ class HTTPRequest {
 }
 
 /**
- * Use this class to make requests to TIBCO cloud.
- * It will add token to the authorisation header before  making request.
- * https://api.cloud.tibco.com is considered as a base URL when someone passes only path to the functions.
+ * Use this class to make requests to TIBCO cloud.<br>
+ * It will add token to the authorisation header before making request.<br>
+ * https://api.cloud.tibco.com is considered as a base URL when you passes only path to the functions.<br>
  * For E.g:
  * ```ts
  * req.doRequest('cic/v1/apps/',{},'mydata') // URL would be https://api.cloud.tibco.com/cic/vi/apps.
  * req.doRequest('http://mydomain.com/cic/v1/apps/',{},'mydata') // URL would be http://mydomain.com/cic/v1/apps/.
+ *
  * // It will add region to the url if as per region in a profile
  * req.doRequest('/cic/v1/apps/',{},'mydata'); //if prof has eu region then URL would be https://eu.api.cloud.tibco.com/cic/v1/apps
  * ```
@@ -263,10 +264,10 @@ class TCRequest {
   private httpRequest: HTTPRequest;
   /**
    *
-   * @param profile Profile to be considered while making request
-   * @param clientId ClientId of a CLI
-   * @param commandName Command which needs to make HTTP request
-   * @param pluginName Plugin to which command belongs
+   * @param profile Profile to be considered while making request.
+   * @param clientId ClientId of a CLI.
+   * @param commandName Command which needs to make HTTP request.
+   * @param pluginName Plugin to which command belongs.
    */
   constructor(profile: Profile, clientId: string, commandName?: string, pluginName?: string) {
     this.profile = profile;
@@ -326,8 +327,8 @@ class TCRequest {
   }
 
   /**
-   * Validate existing token, will refresh if expired
-   * @returns Returns valid Token
+   * Validate existing token, will refresh if expired.
+   * @returns Valid Token.
    */
   async getValidToken() {
     let secret = await secureStore.getProfileSecrets(this.profile.name);
@@ -338,9 +339,9 @@ class TCRequest {
     return secret.accessToken;
   }
   /**
-   * returns axios client with common options
-   * @param baseURL baseURL to be considered for this client. It will add region to the endpoint based on user profile
-   * @returns Axios client
+   * Returns axios client with common options.
+   * @param baseURL Base URL to be considered for this client. It will add region to the endpoint based on user profile.
+   * @returns Axios client.
    */
   async getAxiosClient(baseURL?: string) {
     let client = this.httpRequest.getAxiosClient();
@@ -359,11 +360,11 @@ class TCRequest {
   }
 
   /**
-   * Make HTTP Request to TIBCO Cloud and get a response
+   * Make HTTP Request to TIBCO Cloud and get a response.
    * @param url Url where to make request, region is added to th url as per profile.If only is passes then `https://api.cloud.tibco.com` is considered as a baseUrl.
-   * @param options HTTP options
+   * @param options HTTP options.
    * @param data Data to be sent. If data is passed and no method specified then POST method id considered.
-   * @returns Provides response for HTTP Request
+   * @returns Provides response for HTTP Request.
    */
   async doRequest(url: string, options: AxiosRequestConfig = {}, data?: any) {
     let { newURL, newOptions } = await this.getUrlAndOptions(url, options);
@@ -371,12 +372,12 @@ class TCRequest {
   }
 
   /**
-   * Downloads file from a url
-   * @param url Url from where file needs to be downloaded
-   * @param pathToStore Location where file to be stored
-   * @param options HTTP options
-   * @param showProgressBar To show progress bar on terminal
-   * @returns true if file downloaded succesfully else will throw some error
+   * Downloads file from a url.
+   * @param url Url from where file needs to be downloaded.
+   * @param pathToStore Location where file to be stored.
+   * @param options HTTP options.
+   * @param showProgressBar To show progress bar on the terminal.
+   * @returns true if file downloaded succesfully else will throw some error.
    */
   async download(url: string, pathToStore: string, options: AxiosRequestConfig = {}, showProgressBar = true) {
     let { newURL, newOptions } = await this.getUrlAndOptions(url, options);
@@ -384,12 +385,12 @@ class TCRequest {
   }
 
   /**
-   * Uploads file to a url
-   * @param url Url where file to be uploaded
-   * @param data Multipart form data in simple \{key: value\} format
-   * @param options HTTP options
-   * @param showProgressBar To show progress bar on terminal
-   * @returns HTTP response
+   * Uploads file to a url.
+   * @param url Url where file to be uploaded.
+   * @param data Multipart form data in simple \{key: value\} format.
+   * @param options HTTP options.
+   * @param showProgressBar To show progress bar on the terminal.
+   * @returns HTTP response.
    */
   async upload(
     url: string,

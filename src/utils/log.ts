@@ -52,24 +52,24 @@ function extendDebugger(namespace: string) {
 
 /**
  * @type {Object}
- * Logger object in case you need it oustide Command class
+ * Logger object in case you need it outside Command class.
  */
 export const Logger = {
   /**
    * Logs to the terminal.
    * @memberof Logger
    * @method log
-   * @param message Message to be printed on terminal
+   * @param message Message to be printed on terminal.
    * @param args
    * @returns void
    */
   log,
 
   /**
-   * Debugs on the terminal when DEBUG env variable set
+   * Debugs on the terminal when DEBUG env variable set.
    * @memberof Logger
    * @method debug
-   * @param args debugging info
+   * @param args Debugging info.
    * @returns void
    */
   debug,
@@ -78,7 +78,7 @@ export const Logger = {
    * Warns on the terminal.
    * @memberof Logger
    * @method warn
-   * @param input String used for warning or any error
+   * @param input String used for warning or any error.
    * @returns void
    */
   warn,
@@ -93,8 +93,8 @@ export const Logger = {
    * ```
    * @memberof Logger
    * @method extendDebugger
-   * @param namespace namespace to be added for debugging.
-   * @returns method that can be used for debugging.
+   * @param namespace Namespace to be added for debugging.
+   * @returns Method that can be used for debugging.
    *
    */
   extendDebugger,

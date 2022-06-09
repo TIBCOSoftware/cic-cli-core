@@ -10,7 +10,7 @@ import { ProfileSecrets } from '../models/models';
 import { Logger } from './log';
 
 const SERVICE = 'tibco-cli';
-const ACCOUNT = 'tibco-cli';
+const ACCOUNT = 'client-secret';
 
 async function getProfileSecrets(profName: string, secretType?: keyof ProfileSecrets) {
   let secrets = await keytar.getPassword(SERVICE, profName);

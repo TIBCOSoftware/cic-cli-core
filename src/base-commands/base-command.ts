@@ -3,6 +3,7 @@
  * This file is subject to the license terms contained
  * in the license file that is distributed with this file.
  */
+
 import Command, { flags } from '@oclif/command';
 import { HTTPRequest } from '../utils/request';
 import { setCommand } from '../utils/log';
@@ -14,8 +15,8 @@ const CORE_CONFIG = require('./../configs-for-core/config.json');
 const CONFIG_FILE_NAME = CORE_CONFIG.CONSTANTS.PLUGIN_CONFIG_FILE_NAME;
 
 /**
- * Extend this class while developing commands.
- * It contains some common command flags implemented and creates instances of some useful classes for you.
+ * Extend this class while developing commands.<br>
+ * It contains common flags implemented and creates instances of some useful classes for you.
  */
 export class BaseCommand extends Command {
   private warnings?: boolean;
@@ -48,8 +49,8 @@ export class BaseCommand extends Command {
   }
 
   /**
-   * Get instance of HTTPRequest class
-   * @returns returns instance of HTTPRequest class
+   * Get instance of HTTPRequest class.
+   * @returns returns instance of HTTPRequest class.
    */
   getHTTPRequest() {
     return new HTTPRequest(this.id, this.config.findCommand(this.id as string)?.pluginName);
@@ -59,6 +60,10 @@ export class BaseCommand extends Command {
     if (this.warnings) super.warn(input);
   }
 
+  /**
+   * Get instance of PluginConfig Class.
+   * @returns returns instance of PluginConfig class.
+   */
   getPluginConfig() {
     let localPath = this.localConfigPath || path.join(process.cwd(), CONFIG_FILE_NAME);
     let cmd = this.ctor.id.split(':'); // e.g: cmdId =  tci:flogo:activity:add-kafka

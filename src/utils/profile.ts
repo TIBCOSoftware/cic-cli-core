@@ -14,17 +14,17 @@ import { CLIBaseError } from '..';
 
 const CONFIG_FILE_NAME = 'profile.json';
 
-let userConfig: ProfileConfig;
+let profConfig: ProfileConfig;
 /**
- * Class representing CLI configuration
+ * @class Use this class to manage profile's configurations.
  */
 export class ProfileConfig {
   /**
    *
-   * @param clientID used ot identify TIBCO client for a CLI
-   * @param version version of a configuration
-   * @param defaultProfile default profile from the multiple profiles
-   * @param profiles Array of profiles
+   * @param clientID Id generated for the clients machine.
+   * @param version Configuration version.
+   * @param defaultProfile Default profile from the multiple profiles.
+   * @param profiles Array of profiles.
    */
   constructor(
     public clientID: string,
@@ -34,9 +34,10 @@ export class ProfileConfig {
   ) {}
 
   /**
-   * Adds profile to the configuration
-   * @param profile profile to be added
-   * @param secrets profile secret data
+   * Add profile.
+   * @param profile Profile to be added.
+   * @param secrets Profile's secret data.
+   * @returns void
    */
   addProfile(profile: Profile, secrets: ProfileSecrets) {
     if (this.validateProfile(profile, secrets) == false) {
@@ -59,9 +60,9 @@ export class ProfileConfig {
   }
 
   /**
-   * Searches for the profile in a config
-   * @param name Name of profile
-   * @returns returns profile
+   * Search for the profile.
+   * @param name Name of the profile.
+   * @returns Profile
    */
   getProfileByName(name?: string) {
     name = name || this.defaultProfile;
@@ -73,9 +74,9 @@ export class ProfileConfig {
   }
 
   /**
-   * Removes profile from a config
-   * @param name name of a profile ot be removed
-   * @returns return a promise, if it is resolved then profile was removed successfully
+   * Remove profile.
+   * @param name Name of a profile to be removed.
+   * @returns Returns a promise, if it is resolved then profile was removed successfully.
    */
   async removeProfile(name: string) {
     if (name == this.defaultProfile) {
@@ -117,11 +118,15 @@ export class ProfileConfigManager {
     this.filePath = path.join(configDir, CONFIG_FILE_NAME);
   }
 
+  /**
+   * Save profile config in a file.
+   * @param config Instance of {@link ProfileConfig}.
+   */
   save(config?: ProfileConfig) {
-    if (!config && !userConfig) {
+    if (!config && !profConfig) {
       throw new CLIBaseError('Configuration was not loaded to save');
     }
-    fs.outputJSONSync(this.filePath, config || userConfig, {
+    fs.outputJSONSync(this.filePath, config || profConfig, {
       spaces: '\t',
     });
   }
@@ -145,15 +150,23 @@ export class ProfileConfigManager {
 
   // async destroy() {}
 
+  /**
+   * Get {@link ProfileConfig} instance.
+   * @returns {@link ProfileConfig} instance.
+   */
   getConfig() {
-    if (!userConfig) {
-      userConfig = this.load();
+    if (!profConfig) {
+      profConfig = this.load();
     }
-    return userConfig;
+    return profConfig;
   }
 
+  /**
+   * Reload {@link ProfileConfig} instance.
+   * @returns {@link ProfileConfig} instance.
+   */
   refresh() {
-    userConfig = this.load();
-    return userConfig;
+    profConfig = this.load();
+    return profConfig;
   }
 }

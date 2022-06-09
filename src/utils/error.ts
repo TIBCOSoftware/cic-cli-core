@@ -6,7 +6,7 @@
 
 import { CLIError } from '@oclif/errors';
 /**
- * Extend this class if you want create custom errors
+ * @class Extend this class if you want to create custom errors.
  */
 export class CLIBaseError extends CLIError {
   name: string;
@@ -17,7 +17,7 @@ export class CLIBaseError extends CLIError {
 }
 
 /**
- * In case you want to throw an HTTP Error
+ * @class Class to throw HTTP Errors.
  */
 export class HTTPError extends CLIBaseError {
   httpCode?: string | number;
@@ -25,10 +25,10 @@ export class HTTPError extends CLIBaseError {
   httpResponse?: any;
   /**
    *
-   * @param message Error message
-   * @param httpCode HTTP Code for error
-   * @param httpResponse HTTP Response
-   * @param httpHeaders HTTP Headers
+   * @param message Error message.
+   * @param httpCode HTTP Code for error.
+   * @param httpResponse HTTP Response.
+   * @param httpHeaders HTTP Headers.
    */
   constructor(message: string, httpCode?: string | number, httpResponse?: any, httpHeaders?: { [index: string]: any }) {
     super(message);

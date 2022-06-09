@@ -5,7 +5,7 @@
  */
 
 /**
- * @class Spinner class
+ * @class Use this class to show spinner on the terminal.
  */
 class Spinner {
   private readonly ora: any;
@@ -27,47 +27,47 @@ class Spinner {
   }
 
   /**
-   * To start a spinner
-   * @param text Text while spinning
+   * To start a spinner.
+   * @param text Text while spinning.
    */
   start(text: string) {
     this.ora.start(text);
   }
 
   /**
-   * Mark(✔) spinner's task as success
-   * @param text Text while marking spinner succeed
+   * Mark spinner's task as success.(✔)
+   * @param text Text while marking spinner succeed.
    */
   succeed(text: string) {
     this.ora.succeed(text);
   }
 
   /**
-   * Mark(✖) spinner's task as failed
-   * @param text Text while marking spinner failed
+   * Mark spinner's task as failed.(✖)
+   * @param text Text while marking spinner failed.
    */
   fail(text: string) {
     this.ora.fail(text);
   }
 
   /**
-   * Mark(ℹ) spinner's task with information
-   * @param text Text while marking spinner with information
+   * Mark spinner's task with information.(ℹ)
+   * @param text Text while marking spinner with information.
    */
   info(text: string) {
     this.ora.info(text);
   }
 
   /**
-   * Mark(⚠) spinner's task with warning
-   * @param text Text while marking spinner with warning
+   * Mark spinner's task with warning.(⚠)
+   * @param text Text while marking spinner with warning.
    */
   warn(text: string) {
     this.ora.warn(text);
   }
 
   /**
-   * Stop the spinner without persisting text
+   * Stop the spinner without persisting text.
    */
   stop() {
     this.ora.stop();

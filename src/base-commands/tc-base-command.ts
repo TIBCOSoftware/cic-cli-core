@@ -3,14 +3,15 @@
  * This file is subject to the license terms contained
  * in the license file that is distributed with this file.
  */
+
 import { flags } from '@oclif/command';
 import { ProfileConfig, ProfileConfigManager } from '../utils/profile';
 import { TCRequest } from '../utils/request';
 import { BaseCommand } from './base-command';
 
 /**
- * Extend this class while developing commands which interact with TIBCO Cloud.
- * It contains some common command flags implemented and creates instances of some useful classes for you.
+ * Extend this class while developing commands which interact with TIBCO Cloud.<br>
+ * It contains common flags implemented and creates instances of some useful classes for you.
  */
 export class TCBaseCommand extends BaseCommand {
   private profileName?: string;
@@ -36,16 +37,16 @@ export class TCBaseCommand extends BaseCommand {
   }
 
   /**
-   * Gets the config from a config file
-   * @returns Returns configuration object
+   * Gets the profile config.
+   * @returns ProfileConfig Instance.
    */
   getProfileConfig() {
     return new ProfileConfigManager(this.config.configDir).getConfig();
   }
 
   /**
-   * Saves config to the file
-   * @param config Config to be saved into the file
+   * Saves profile object to the file.
+   * @param config Profile to be saved into the file
    * @returns void
    */
   saveProfileConfig(config: ProfileConfig) {
@@ -53,16 +54,16 @@ export class TCBaseCommand extends BaseCommand {
   }
 
   /**
-   * Reloads config from config file
-   * @returns Config
+   * Reloads profile from the file.
+   * @returns ProfileConfig Instance.
    */
   reloadProfileConfig() {
     return new ProfileConfigManager(this.config.configDir).refresh();
   }
 
   /**
-   * Get instance of TCRequest class
-   * @returns  returns instance of TCRequest class
+   * Get instance of TCRequest class.
+   * @returns Instance of TCRequest class.
    */
   getTCRequest() {
     let profile = this.getProfileConfig().getProfileByName(this.profileName);

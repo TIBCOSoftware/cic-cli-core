@@ -14,10 +14,11 @@ Using this package won't only give features but will help in maintaining a unifi
 5. [HTTP Requests](#http-requests)
     1. [HTTPRequest](#httprequest)
     2. [TCRequest](#tcrequest)
-6. [UX](#ux)
-7. [API Documentation](#api-documentation)
-8. [Issue](#issues)
-9. [License](#license)
+6. [Plugin Configurations](#plugin-configurations)
+7. [UX](#ux)
+8. [API Documentation](#api-documentation)
+9. [Issue](#issues)
+10. [License](#license)
 
 ## Get started
 
@@ -308,7 +309,7 @@ You can also show progress bar on terminal by just passing last parameter `true`
 ```ts
 let req = new HTTPRequest('cmdName', 'PluginName');
 
-// upload(url, pathToStore, axios Options, showProgressBar)
+// download(url, pathToStore, axios Options, showProgressBar)
 let isDownloaded = await req.download('https://api.mydomain.com/v1/apps/pull', '/Users/foo/Desktop/', {}, true);
 
 if (isDownloaded === true) {
@@ -355,6 +356,67 @@ Same as HTTPRequest's getAxiosClient, this one adds region to url, token to the 
 #### upload and download
 
 Both methods are same as HTTPRequest's methods, these only adds region to url, token to the header and before making requests
+
+## Plugin Configurations
+
+Your plugin may also need configurations from user. To make those configurations persistent, you need to store them into the files. Below are few details on config file -
+
+- Configuration is stored in `.ini` file format.
+- It can be at **local level** in the users cwd or they can pass location explicitly using `--config` flag.
+- At **global level** this file is stored at `~/.config/@tibco-software/cic-cli-main/tibco-cli-config.ini`.
+- Local file will have higher precedence over global file.
+- These files will contain configurations for other plugins too. Check [here](https://github.com/TIBCOSoftware/cic-cli-main#configure-plugins) to understand the structure of file.
+
+`PluginConfig` Module manages all the operations needed for the configuratio file.
+
+**Example** to demonstrate behaviour of this module - \
+`tibco tci:flogo:scale-app` \
+Above command scales flogo app in TCI and it needs `app-id` which should be fetched from a config file. \
+Config will look something like below -
+
+```ini
+
+[tci]
+
+[tci.flogo]
+app-id=1
+
+[tcam]
+...
+```
+
+```ts
+
+async run() {
+    
+  let config = this.getPluginConfig();
+  
+  // if property exists locally then return value 
+  // if property exits globally then return value
+  // else return undefined
+  let id = config.get("app-id"); 
+  
+  // if property exists locally then return local value else return undefined
+  let id = config.get("appi-id", {source: 'local'});
+
+
+  // In above examples, we provided only property name and path from the root section was added by the config module.
+  // In below example since absoluePath option is true, you need to pass the complete path of the property from the beginning of the root section
+  // This is helpful when you want to fetch properties from other topics
+  let id = config.get("tci.flogo.appi-id", {source: 'local', absolutePath: true});
+
+
+  // Update or add app-id property locally
+  // In case if config file does not have any sections and subsections for the property, config module will create them
+  config.set("app-id", 2, {source:'local'});
+
+  // Unset the property locally
+  config.unset("app-id",{source:'local'})
+
+}
+
+```
+
 
 ## UX
 

@@ -133,7 +133,7 @@ export class PluginConfig {
     let data = options.source === 'local' ? this.localConfig : this.globalConfig;
     _.set(data, jsonPath, value);
     debug(`Added or updated property ${property} with value ${value} at ${options.source} config`);
-    this.save();
+    this.save(options.source);
     this.reload();
   }
 
@@ -157,7 +157,7 @@ export class PluginConfig {
     let data = options.source === 'local' ? this.localConfig : this.globalConfig;
     _.unset(data, jsonPath);
     debug(`Removed property ${property} from ${options.source} config`);
-    this.save();
+    this.save(options.source);
     this.reload();
   }
 
@@ -181,12 +181,12 @@ export class PluginConfig {
     this.localConfig = this.readConfigData(this.localConfigPath, 'local');
   }
 
-  private save() {
-    if (!_.isEmpty(this.localConfig)) {
+  private save(source: 'local' | 'global') {
+    if (source == 'local') {
       fs.outputFileSync(this.localConfigPath, ini.stringify(this.localConfig));
     }
 
-    if (!_.isEmpty(this.globalConfig)) {
+    if (source == 'global') {
       fs.outputFileSync(this.globalConfigPath, ini.stringify(this.globalConfig));
     }
   }
@@ -199,13 +199,16 @@ export class PluginConfig {
       isDir = false;
     }
 
+    // if path is a folder then consider  <folder_path>/tibco-cli-config.ini
     if (isDir) {
       return path.join(filePath, CONFIG_FILE_NAME);
     }
 
+    // if path is to a .ini file then consider .ini file path
     if (path.extname(filePath) == '.ini') {
       return filePath;
     } else {
+      // if path is to invalid file then pick its folder and search for tibco-cli-config.ini file
       return path.join(path.dirname(filePath), CONFIG_FILE_NAME);
     }
   }

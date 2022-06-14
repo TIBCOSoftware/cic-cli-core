@@ -16,4 +16,4 @@ export { secureStore } from './utils/secure-store';
 export { CLIBaseError, HTTPError } from './utils/error';
 export const chalk = require('chalk');
 export const CLI_VERSION = require('../package.json').version;
-export * as ini from 'ini';
+export const ini = require('ini');

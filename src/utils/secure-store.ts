@@ -12,7 +12,9 @@ import { Logger } from './log';
 const SERVICE = 'tibco-cli';
 const ACCOUNT = 'client-secret';
 
-async function getProfileSecrets(profName: string, secretType?: keyof ProfileSecrets) {
+const secureStore: any = {};
+
+secureStore.getProfileSecrets = async function(profName: string, secretType?: keyof ProfileSecrets){
   let secrets = await keytar.getPassword(SERVICE, profName);
 
   if (!secrets) {
@@ -31,20 +33,21 @@ async function getProfileSecrets(profName: string, secretType?: keyof ProfileSec
     return secretsObj[secretType as any];
   }
   return secretsObj;
+
 }
 
-async function getClientSecret() {
-  return await keytar.getPassword(SERVICE, ACCOUNT);
+secureStore.getClientSecret = async function() {
+  return keytar.getPassword(SERVICE, ACCOUNT);
 }
 
-async function saveClientSecret(clientSecret: string) {
-  return await keytar.setPassword(SERVICE, ACCOUNT, clientSecret);
+secureStore.saveClientSecret = async function(clientSecret: string) {
+  return keytar.setPassword(SERVICE, ACCOUNT, clientSecret);
 }
 
-async function saveProfileSecrets(profName: string, secrets: ProfileSecrets) {
+secureStore.saveProfileSecrets = async function(profName: string, secrets: ProfileSecrets) {
   let currSecrets;
   try {
-    currSecrets = await getProfileSecrets(profName);
+    currSecrets = await this.getProfileSecrets(profName);
   } catch (err) {}
 
   let newSecrets;
@@ -59,19 +62,14 @@ async function saveProfileSecrets(profName: string, secrets: ProfileSecrets) {
   await keytar.setPassword(SERVICE, profName, JSON.stringify(newSecrets));
 }
 
-async function removeProfileSecrets(profile: string) {
-  return await keytar.deletePassword(SERVICE, profile);
+secureStore.removeProfileSecrets = async function(profile: string) {
+  return keytar.deletePassword(SERVICE, profile);
 }
 
-async function removeClientSecret() {
-  return await keytar.deletePassword(SERVICE, ACCOUNT);
+
+secureStore.removeClientSecret = async function() {
+  return keytar.deletePassword(SERVICE, ACCOUNT);
 }
 
-export const secureStore = {
-  getProfileSecrets,
-  saveProfileSecrets,
-  getClientSecret,
-  removeProfileSecrets,
-  saveClientSecret,
-  removeClientSecret,
-};
+
+export { secureStore };

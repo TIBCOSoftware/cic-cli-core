@@ -56,6 +56,9 @@ Using this package won't only give features but will help in maintaining a unifi
 
 > **_NOTE:_** The TIBCO Cloud CLI works on oclif 1.18.x version. Please consider using the same version of oclif while developing the plugin.
 
+### How-to guide
+
+[Build Plugins on TIBCO Cloud CLI](https://www.walkthrough.so/pblc/niqkfEnGwRZM/build-plugins-for-tibco-cloud-tm-cli?sn=0) will guide you in detail to develop your first sample plugin.
 ## Commands
 
 ### BaseCommand

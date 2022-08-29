@@ -34,15 +34,17 @@ function showTableFromTobject(tObject: any, title?: string) {
     topRight = '╣';
   }
   let { colNames, colAlignArray, maxColLengthObject } = getColNamesAndWidth(tObject);
+  console.log(maxColLengthObject);
 
   let tableWidth = 3;
   const colWidthsArray: number[] = [];
   let highestIndex = 0;
   let idX = 0;
-  for (const colLen of Object.keys(maxColLengthObject)) {
-    colWidthsArray.push(maxColLengthObject[colLen] + 3);
-    tableWidth += maxColLengthObject[colLen] + 3;
-    if (maxColLengthObject[colLen] > colWidthsArray[highestIndex]!) {
+
+  for (const colName of colNames) {
+    colWidthsArray.push(maxColLengthObject[colName] + 3);
+    tableWidth += maxColLengthObject[colName] + 3;
+    if (maxColLengthObject[colName] > colWidthsArray[highestIndex]!) {
       highestIndex = idX;
     }
     idX++;
@@ -81,18 +83,18 @@ function showTableFromTobject(tObject: any, title?: string) {
     style: { compact: true, 'padding-left': 1, 'padding-right': 1, head: ['green'], border: ['white'] },
     head: colNames,
   });
+
   let index = 0;
   for (const row of Object.keys(tObject)) {
     index++;
     const rowArray = [String(index)];
-    for (const el of Object.keys(tObject[row])) {
-      if (tObject[row][el]) {
-        rowArray.push(tObject[row][el]);
-      } else {
-        let val = getEmptyVal(tObject[row][el]);
-        rowArray.push(val);
-      }
-    }
+
+    colNames
+      .filter((el, i) => i != 0)
+      .map((el) => {
+        rowArray.push(tObject[row][el] || getEmptyVal(tObject[row][el]));
+      });
+
     tab.push(rowArray);
   }
   const tabString = tab.toString();
@@ -119,16 +121,22 @@ function showTableFromTobject(tObject: any, title?: string) {
 }
 
 function getColNamesAndWidth(arrOfObj: any) {
-  let colNames: string[] = [];
+  let colNames: string[] = ['NR'];
   let colAlignArray: string[] = [];
   const maxColLengthObject: any = {};
   let ind = 0;
   for (const row of Object.keys(arrOfObj)) {
     ind++;
-    colNames = ['NR'];
     colAlignArray = ['middle'];
+
     for (const col of Object.keys(arrOfObj[row])) {
-      colNames.push(col);
+      if (colNames.indexOf(col) == -1) {
+        colNames.push(col);
+      } else {
+        let locn = colNames.indexOf(col);
+        colNames[locn] = col;
+      }
+
       colAlignArray.push('left');
       const indexLength = String(ind).length;
       if (!maxColLengthObject.NR || maxColLengthObject.NR < indexLength) {

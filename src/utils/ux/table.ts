@@ -171,9 +171,15 @@ function getEmptyVal(val: any) {
   return emptyVal || '';
 }
 
+/**
+ * Prints table for array of object. (Takes care of terminal width as well)
+ * @memberof module:ux
+ * @method showTable
+ * @param tObject Array of objects.
+ * @param title Title of the table.
+ * @returns void
+ */
 export function showTable(tObject: any, title?: string) {
-  // console.log('Table: ', title)
-  // console.table(tObject)
   showTableFromTobject(tObject, title);
 }
 

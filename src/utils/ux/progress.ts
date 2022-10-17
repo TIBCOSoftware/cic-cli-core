@@ -6,8 +6,9 @@
 
 /**
  * @class Use this class to show progress bar on the terminal.
+ * @memberof module:ux
  */
-class ProgressBar {
+export class ProgressBar {
   private readonly bar: any;
 
   /**
@@ -48,6 +49,14 @@ class ProgressBar {
   }
 }
 
+/**
+ * Creates instance of ProgressBar class.
+ * @memberof module:ux
+ * @method getProgressBar
+ * @param format Bar contains ootb tokens and custom tokens.
+ * @param total Total no. of ticks to complete progress on the bar.
+ * @returns  ProgressBar instance
+ */
 export async function getProgressBar(format: string, total: number) {
   return new ProgressBar(await import('progress'), format, total);
 }

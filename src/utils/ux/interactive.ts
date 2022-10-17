@@ -7,6 +7,15 @@
 import { Choice } from '../../models/models';
 import { Logger } from '../log';
 
+/**
+ * Prompt a question on the terminal.
+ * @memberof module:ux
+ * @method prompt
+ * @param question Question to be prompted.
+ * @param type Type of a input (input or password).
+ * @param answer If choice already passed as command option.
+ * @returns Answer of a prompt.
+ */
 export async function prompt(question: string, type: 'input' | 'password' = 'input', answer?: string) {
   if (!answer && answer !== '') {
     const { prompt } = require('enquirer');
@@ -18,6 +27,15 @@ export async function prompt(question: string, type: 'input' | 'password' = 'inp
   }
 }
 
+/**
+ * Prompt choices on the terminal.
+ * @memberof module:ux
+ * @method promptChoices
+ * @param question Question to be displayed when choices are prompted.
+ * @param choices Choices for the selection.
+ * @param answer If choice already passed as command option.
+ * @returns Array of selected choices.
+ */
 export async function promptChoices(question: string, choices: Choice[], answer?: string) {
   if (!answer && answer !== '') {
     if (choices.length === 0) return [];
@@ -37,6 +55,15 @@ export async function promptChoices(question: string, choices: Choice[], answer?
   }
 }
 
+/**
+ * Prompt choices with search capability on ther terminal.
+ * @memberof module:ux
+ * @method promptChoicesWithSearch
+ * @param question Question to be displayed when choices are prompted.
+ * @param choices Choices for the selection.
+ * @param answer If choice already passed as command option.
+ * @returns Array of selected choices.
+ */
 export async function promptChoicesWithSearch(question: string, choices: Choice[], answer?: string) {
   if (!answer && answer !== '') {
     if (choices.length === 0) return [];
@@ -56,6 +83,15 @@ export async function promptChoicesWithSearch(question: string, choices: Choice[
   }
 }
 
+/**
+ * Prompt mulit select choices with search capability on ther terminal.
+ * @memberof module:ux
+ * @method promptMultiSelectChoices
+ * @param question Question to be displayed when choices are prompted.
+ * @param choices Choices for the selection.
+ * @param answer If choice already passed as command option.
+ * @returns Array of selected choices.
+ */
 export async function promptMultiSelectChoices(question: string, choices: Choice[], answer?: string[]) {
   if (answer) {
     Logger.log('Using answer (' + answer + ') for question: ' + question);

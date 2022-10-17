@@ -7,7 +7,7 @@
 export { TCBaseCommand } from './base-commands/tc-base-command';
 export { BaseCommand } from './base-commands/base-command';
 export { Logger } from './utils/log';
-export { ux } from './utils/ux';
+//export { ux, Spinner } from './utils/ux';
 export { ProfileConfigManager, ProfileConfig } from './utils/profile';
 export * from './models/models';
 export { HTTPRequest, TCRequest } from './utils/request';
@@ -17,3 +17,5 @@ export { CLIBaseError, HTTPError } from './utils/error';
 export const chalk = require('chalk');
 export const CLI_VERSION = require('../package.json').version;
 export const ini = require('ini');
+
+export * as ux from './utils/ux';

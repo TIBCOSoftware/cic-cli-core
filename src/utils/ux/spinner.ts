@@ -6,8 +6,9 @@
 
 /**
  * @class Use this class to show spinner on the terminal.
+ * @memberof module:ux
  */
-class Spinner {
+export class Spinner {
   private readonly ora: any;
 
   constructor(ora: any) {
@@ -74,6 +75,12 @@ class Spinner {
   }
 }
 
+/**
+ * Returns the instance of Spinner class.
+ * @memberof module:ux
+ * @method spinner
+ * @returns Spinner instance.
+ */
 export async function spinner() {
   return new Spinner(await import('ora'));
 }

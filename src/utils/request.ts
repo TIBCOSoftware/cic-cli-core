@@ -150,7 +150,7 @@ class HTTPRequest {
     let writer = fs.createWriteStream(pathToStore);
 
     if (showProgressBar) {
-      let getProgressBar = (await import('./ux/index')).ux.getProgressBar;
+      let getProgressBar = (await import('./ux/index')).getProgressBar;
       let bar = await getProgressBar(`:bar :percent | :currLen/${this.readableSize(totalLen)}`, totalLen);
       let len = 0;
       response.body.on('data', (chunk: any) => {
@@ -211,7 +211,7 @@ class HTTPRequest {
     if (showProgressBar) {
       let totalUploadedBytes = 0;
       let totalBytes = formData.getLengthSync();
-      let getProgressBar = (await import('./ux/index')).ux.getProgressBar;
+      let getProgressBar = (await import('./ux/index')).getProgressBar;
       let bar = await getProgressBar(`:bar :percent | :uploadedBytes/${this.readableSize(totalBytes)} `, totalBytes);
       formData.on('data', (chunk) => {
         totalUploadedBytes += chunk.length;

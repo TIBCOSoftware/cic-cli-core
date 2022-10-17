@@ -1,12 +1,13 @@
+## Modules
+
+<dl>
+<dt><a href="#module_ux">ux</a></dt>
+<dd></dd>
+</dl>
+
 ## Classes
 
 <dl>
-<dt><a href="#ProgressBar">ProgressBar</a></dt>
-<dd><p>Use this class to show progress bar on the terminal.</p>
-</dd>
-<dt><a href="#Spinner">Spinner</a></dt>
-<dd><p>Use this class to show spinner on the terminal.</p>
-</dd>
 <dt><a href="#BaseCommand">BaseCommand</a></dt>
 <dd><p>Extend this class while developing commands.<br>
 It contains common flags implemented and creates instances of some useful classes for you.</p>
@@ -47,9 +48,6 @@ req.doRequest(&#39;/cic/v1/apps/&#39;,{},&#39;mydata&#39;); //if prof has eu reg
 ## Members
 
 <dl>
-<dt><a href="#ux">ux</a> : <code>Object</code></dt>
-<dd><p>UX object for the CLI.</p>
-</dd>
 <dt><a href="#Logger">Logger</a> : <code>Object</code></dt>
 <dd><p>Logger object in case you need it outside Command class.</p>
 </dd>
@@ -63,21 +61,46 @@ req.doRequest(&#39;/cic/v1/apps/&#39;,{},&#39;mydata&#39;); //if prof has eu reg
 </dd>
 </dl>
 
-<a name="ProgressBar"></a>
+<a name="module_ux"></a>
 
-## ProgressBar
+## ux
+
+* [ux](#module_ux)
+    * [.ProgressBar](#module_ux.ProgressBar)
+        * [new ProgressBar(Bar, format, total)](#new_module_ux.ProgressBar_new)
+        * [.tick(count, customTokens)](#module_ux.ProgressBar+tick)
+        * [.log(msg)](#module_ux.ProgressBar+log)
+    * [.Spinner](#module_ux.Spinner)
+        * [.start(text)](#module_ux.Spinner+start)
+        * [.succeed(text)](#module_ux.Spinner+succeed)
+        * [.fail(text)](#module_ux.Spinner+fail)
+        * [.info(text)](#module_ux.Spinner+info)
+        * [.warn(text)](#module_ux.Spinner+warn)
+        * [.stop()](#module_ux.Spinner+stop)
+    * [.prompt(question, type, answer)](#module_ux.prompt) ⇒
+    * [.promptChoices(question, choices, answer)](#module_ux.promptChoices) ⇒
+    * [.promptChoicesWithSearch(question, choices, answer)](#module_ux.promptChoicesWithSearch) ⇒
+    * [.promptMultiSelectChoices(question, choices, answer)](#module_ux.promptMultiSelectChoices) ⇒
+    * [.open(target, options)](#module_ux.open) ⇒
+    * [.getProgressBar(format, total)](#module_ux.getProgressBar) ⇒
+    * [.spinner()](#module_ux.spinner) ⇒
+    * [.showTable(tObject, title)](#module_ux.showTable) ⇒
+
+<a name="module_ux.ProgressBar"></a>
+
+### ux.ProgressBar
 Use this class to show progress bar on the terminal.
 
-**Kind**: global class  
+**Kind**: static class of [<code>ux</code>](#module_ux)  
 
-* [ProgressBar](#ProgressBar)
-    * [new ProgressBar(Bar, format, total)](#new_ProgressBar_new)
-    * [.tick(count, customTokens)](#ProgressBar+tick)
-    * [.log(msg)](#ProgressBar+log)
+* [.ProgressBar](#module_ux.ProgressBar)
+    * [new ProgressBar(Bar, format, total)](#new_module_ux.ProgressBar_new)
+    * [.tick(count, customTokens)](#module_ux.ProgressBar+tick)
+    * [.log(msg)](#module_ux.ProgressBar+log)
 
-<a name="new_ProgressBar_new"></a>
+<a name="new_module_ux.ProgressBar_new"></a>
 
-### new ProgressBar(Bar, format, total)
+#### new ProgressBar(Bar, format, total)
 
 | Param | Description |
 | --- | --- |
@@ -85,105 +108,207 @@ Use this class to show progress bar on the terminal.
 | format | Format of the bar. |
 | total | Total no. of ticks to complete the progress bar. |
 
-<a name="ProgressBar+tick"></a>
+<a name="module_ux.ProgressBar+tick"></a>
 
-### progressBar.tick(count, customTokens)
+#### progressBar.tick(count, customTokens)
 Progress the bar based on the no. of ticks passed in count.
 
-**Kind**: instance method of [<code>ProgressBar</code>](#ProgressBar)  
+**Kind**: instance method of [<code>ProgressBar</code>](#module_ux.ProgressBar)  
 
 | Param | Default | Description |
 | --- | --- | --- |
 | count | <code>1</code> | No. of ticks to be passed to complete the progress. |
 | customTokens |  | To update the token values in progress bar. |
 
-<a name="ProgressBar+log"></a>
+<a name="module_ux.ProgressBar+log"></a>
 
-### progressBar.log(msg)
+#### progressBar.log(msg)
 To print some message on the terminal when progress bar is running.
 
-**Kind**: instance method of [<code>ProgressBar</code>](#ProgressBar)  
+**Kind**: instance method of [<code>ProgressBar</code>](#module_ux.ProgressBar)  
 
 | Param | Description |
 | --- | --- |
 | msg | Message to be printed. |
 
-<a name="Spinner"></a>
+<a name="module_ux.Spinner"></a>
 
-## Spinner
+### ux.Spinner
 Use this class to show spinner on the terminal.
 
-**Kind**: global class  
+**Kind**: static class of [<code>ux</code>](#module_ux)  
 
-* [Spinner](#Spinner)
-    * [.start(text)](#Spinner+start)
-    * [.succeed(text)](#Spinner+succeed)
-    * [.fail(text)](#Spinner+fail)
-    * [.info(text)](#Spinner+info)
-    * [.warn(text)](#Spinner+warn)
-    * [.stop()](#Spinner+stop)
+* [.Spinner](#module_ux.Spinner)
+    * [.start(text)](#module_ux.Spinner+start)
+    * [.succeed(text)](#module_ux.Spinner+succeed)
+    * [.fail(text)](#module_ux.Spinner+fail)
+    * [.info(text)](#module_ux.Spinner+info)
+    * [.warn(text)](#module_ux.Spinner+warn)
+    * [.stop()](#module_ux.Spinner+stop)
 
-<a name="Spinner+start"></a>
+<a name="module_ux.Spinner+start"></a>
 
-### spinner.start(text)
+#### spinner.start(text)
 To start a spinner.
 
-**Kind**: instance method of [<code>Spinner</code>](#Spinner)  
+**Kind**: instance method of [<code>Spinner</code>](#module_ux.Spinner)  
 
 | Param | Description |
 | --- | --- |
 | text | Text while spinning. |
 
-<a name="Spinner+succeed"></a>
+<a name="module_ux.Spinner+succeed"></a>
 
-### spinner.succeed(text)
+#### spinner.succeed(text)
 Mark spinner's task as success.(✔)
 
-**Kind**: instance method of [<code>Spinner</code>](#Spinner)  
+**Kind**: instance method of [<code>Spinner</code>](#module_ux.Spinner)  
 
 | Param | Description |
 | --- | --- |
 | text | Text while marking spinner succeed. |
 
-<a name="Spinner+fail"></a>
+<a name="module_ux.Spinner+fail"></a>
 
-### spinner.fail(text)
+#### spinner.fail(text)
 Mark spinner's task as failed.(✖)
 
-**Kind**: instance method of [<code>Spinner</code>](#Spinner)  
+**Kind**: instance method of [<code>Spinner</code>](#module_ux.Spinner)  
 
 | Param | Description |
 | --- | --- |
 | text | Text while marking spinner failed. |
 
-<a name="Spinner+info"></a>
+<a name="module_ux.Spinner+info"></a>
 
-### spinner.info(text)
+#### spinner.info(text)
 Mark spinner's task with information.(ℹ)
 
-**Kind**: instance method of [<code>Spinner</code>](#Spinner)  
+**Kind**: instance method of [<code>Spinner</code>](#module_ux.Spinner)  
 
 | Param | Description |
 | --- | --- |
 | text | Text while marking spinner with information. |
 
-<a name="Spinner+warn"></a>
+<a name="module_ux.Spinner+warn"></a>
 
-### spinner.warn(text)
+#### spinner.warn(text)
 Mark spinner's task with warning.(⚠)
 
-**Kind**: instance method of [<code>Spinner</code>](#Spinner)  
+**Kind**: instance method of [<code>Spinner</code>](#module_ux.Spinner)  
 
 | Param | Description |
 | --- | --- |
 | text | Text while marking spinner with warning. |
 
-<a name="Spinner+stop"></a>
+<a name="module_ux.Spinner+stop"></a>
 
-### spinner.stop()
+#### spinner.stop()
 Stop the spinner without persisting text.
 
-**Kind**: instance method of [<code>Spinner</code>](#Spinner)  
+**Kind**: instance method of [<code>Spinner</code>](#module_ux.Spinner)  
+<a name="module_ux.prompt"></a>
+
+### ux.prompt(question, type, answer) ⇒
+Prompt a question on the terminal.
+
+**Kind**: static method of [<code>ux</code>](#module_ux)  
+**Returns**: Answer of a prompt.  
+
+| Param | Description |
+| --- | --- |
+| question | Question to be prompted. |
+| type | Type of a input (input or password). |
+| answer | If choice already passed as command option. |
+
+<a name="module_ux.promptChoices"></a>
+
+### ux.promptChoices(question, choices, answer) ⇒
+Prompt choices on the terminal.
+
+**Kind**: static method of [<code>ux</code>](#module_ux)  
+**Returns**: Array of selected choices.  
+
+| Param | Description |
+| --- | --- |
+| question | Question to be displayed when choices are prompted. |
+| choices | Choices for the selection. |
+| answer | If choice already passed as command option. |
+
+<a name="module_ux.promptChoicesWithSearch"></a>
+
+### ux.promptChoicesWithSearch(question, choices, answer) ⇒
+Prompt choices with search capability on ther terminal.
+
+**Kind**: static method of [<code>ux</code>](#module_ux)  
+**Returns**: Array of selected choices.  
+
+| Param | Description |
+| --- | --- |
+| question | Question to be displayed when choices are prompted. |
+| choices | Choices for the selection. |
+| answer | If choice already passed as command option. |
+
+<a name="module_ux.promptMultiSelectChoices"></a>
+
+### ux.promptMultiSelectChoices(question, choices, answer) ⇒
+Prompt mulit select choices with search capability on ther terminal.
+
+**Kind**: static method of [<code>ux</code>](#module_ux)  
+**Returns**: Array of selected choices.  
+
+| Param | Description |
+| --- | --- |
+| question | Question to be displayed when choices are prompted. |
+| choices | Choices for the selection. |
+| answer | If choice already passed as command option. |
+
+<a name="module_ux.open"></a>
+
+### ux.open(target, options) ⇒
+Open file or browser or any app.
+
+**Kind**: static method of [<code>ux</code>](#module_ux)  
+**Returns**: The spawned child process. You would normally not need to use this for anything, but it can be useful if you'd like to attach custom event listeners or perform other operations directly on the spawned process.  
+
+| Param | Description |
+| --- | --- |
+| target | The thing you want to open. Can be a URL, file, or executable. Opens in the default app for the file type. For example, URLs open in your default browser. |
+| options | Check [options](https://github.com/sindresorhus/open#options) here. |
+
+<a name="module_ux.getProgressBar"></a>
+
+### ux.getProgressBar(format, total) ⇒
+Creates instance of ProgressBar class.
+
+**Kind**: static method of [<code>ux</code>](#module_ux)  
+**Returns**: ProgressBar instance  
+
+| Param | Description |
+| --- | --- |
+| format | Bar contains ootb tokens and custom tokens. |
+| total | Total no. of ticks to complete progress on the bar. |
+
+<a name="module_ux.spinner"></a>
+
+### ux.spinner() ⇒
+Returns the instance of Spinner class.
+
+**Kind**: static method of [<code>ux</code>](#module_ux)  
+**Returns**: Spinner instance.  
+<a name="module_ux.showTable"></a>
+
+### ux.showTable(tObject, title) ⇒
+Prints table for array of object. (Takes care of terminal width as well)
+
+**Kind**: static method of [<code>ux</code>](#module_ux)  
+**Returns**: void  
+
+| Param | Description |
+| --- | --- |
+| tObject | Array of objects. |
+| title | Title of the table. |
+
 <a name="BaseCommand"></a>
 
 ## BaseCommand
@@ -604,124 +729,6 @@ Uploads file to a url.
 | data |  | Multipart form data in simple \{key: value\} format. |
 | options |  | HTTP options. |
 | showProgressBar | <code>false</code> | To show progress bar on the terminal. |
-
-<a name="ux"></a>
-
-## ux : <code>Object</code>
-UX object for the CLI.
-
-**Kind**: global variable  
-
-* [ux](#ux) : <code>Object</code>
-    * [.prompt](#ux.prompt) ⇒
-    * [.promptChoices(question, choices, answer)](#ux.promptChoices) ⇒
-    * [.promptChoicesWithSearch(question, choices, answer)](#ux.promptChoicesWithSearch) ⇒
-    * [.promptMultiSelectChoices(question, choices, answer)](#ux.promptMultiSelectChoices) ⇒
-    * [.open(target, options)](#ux.open) ⇒
-    * [.getProgressBar(format, total)](#ux.getProgressBar) ⇒
-    * [.spinner()](#ux.spinner) ⇒
-    * [.showTable(tObject, title)](#ux.showTable)
-
-<a name="ux.prompt"></a>
-
-### ux.prompt ⇒
-Promp a question on terminal.
-
-**Kind**: static property of [<code>ux</code>](#ux)  
-**Returns**: Answer of a prompt.  
-
-| Param | Description |
-| --- | --- |
-| question | Question to be prompted. |
-| type | Type of a input (input or password). |
-| answer | If choice already passed as command option. |
-
-<a name="ux.promptChoices"></a>
-
-### ux.promptChoices(question, choices, answer) ⇒
-Prompt choices on terminal.
-
-**Kind**: static method of [<code>ux</code>](#ux)  
-**Returns**: Array of selected choices.  
-
-| Param | Description |
-| --- | --- |
-| question | Question to be displayed when choices are prompted. |
-| choices | Choices for the selection. |
-| answer | If choice already passed as command option. |
-
-<a name="ux.promptChoicesWithSearch"></a>
-
-### ux.promptChoicesWithSearch(question, choices, answer) ⇒
-Prompt choices with search capability on ther terminal.
-
-**Kind**: static method of [<code>ux</code>](#ux)  
-**Returns**: Array of selected choices.  
-
-| Param | Description |
-| --- | --- |
-| question | Question to be displayed when choices are prompted. |
-| choices | Choices for the selection. |
-| answer | If choice already passed as command option. |
-
-<a name="ux.promptMultiSelectChoices"></a>
-
-### ux.promptMultiSelectChoices(question, choices, answer) ⇒
-Prompt mulit select choices with search capability on ther terminal.
-
-**Kind**: static method of [<code>ux</code>](#ux)  
-**Returns**: Array of selected choices.  
-
-| Param | Description |
-| --- | --- |
-| question | Question to be displayed when choices are prompted. |
-| choices | Choices for the selection. |
-| answer | If choice already passed as command option. |
-
-<a name="ux.open"></a>
-
-### ux.open(target, options) ⇒
-Open file or browser or any app.
-
-**Kind**: static method of [<code>ux</code>](#ux)  
-**Returns**: The spawned child process. You would normally not need to use this for anything, but it can be useful if you'd like to attach custom event listeners or perform other operations directly on the spawned process.  
-
-| Param | Description |
-| --- | --- |
-| target | The thing you want to open. Can be a URL, file, or executable. Opens in the default app for the file type. For example, URLs open in your default browser. |
-| options | Check [options](https://github.com/sindresorhus/open#options) here. |
-
-<a name="ux.getProgressBar"></a>
-
-### ux.getProgressBar(format, total) ⇒
-Creates instance of ProgressBar class.
-
-**Kind**: static method of [<code>ux</code>](#ux)  
-**Returns**: ProgressBar instance  
-
-| Param | Description |
-| --- | --- |
-| format | Bar contains ootb tokens and custom tokens. |
-| total | Total no. of ticks to complete progress on the bar. |
-
-<a name="ux.spinner"></a>
-
-### ux.spinner() ⇒
-Creates a spinner instance from Spinner class.
-
-**Kind**: static method of [<code>ux</code>](#ux)  
-**Returns**: Spinner instance.  
-<a name="ux.showTable"></a>
-
-### ux.showTable(tObject, title)
-Prints table for array of object. (Takes care of terminal width as well)
-
-**Kind**: static method of [<code>ux</code>](#ux)  
-
-| Param | Description |
-| --- | --- |
-| tObject | Array of objects. |
-| title | Title of the table. |
 
 <a name="Logger"></a>
 

@@ -7,7 +7,21 @@
         "REVOKE_TOKEN":"/idm/v1/oauth2/tokens/operations/revoke"
     },
     "CONSTANTS":{
-        "PLUGIN_CONFIG_FILE_NAME":"tibco-cli-config.ini"
+        "PLUGIN_CONFIG_FILE_NAME":"tibco-cli-config.ini",
+        "REGIONS":[
+            {
+              "name": "United States",
+              "value": "us"
+            },
+            {
+              "name": "Europe",
+              "value": "eu"
+            },
+            {
+              "name": "Australia",
+              "value": "au"
+            }
+          ]
     }
 
 }

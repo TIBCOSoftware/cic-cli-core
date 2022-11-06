@@ -6,7 +6,7 @@
 
 import axios, { AxiosRequestConfig } from 'axios';
 import * as url from 'url';
-import { HTTPResponse, Profile, ProfileSecrets } from '../models/models';
+import { HTTPResponse, Profile, ProfileSecrets, region } from '../models/models';
 import { HTTPError } from './error';
 import { Logger } from './log';
 import { secureStore } from './secure-store';
@@ -110,7 +110,7 @@ class HTTPRequest {
     const responseAxios = await axios(url, options);
     if (responseAxios.status < 200 || responseAxios.status > 399) {
       throw new HTTPError(
-        `Failed to call path ${url} with \n Status ${responseAxios.status} \n Response \n ${responseAxios.data}`,
+        `Failed to call path ${url} \nStatus ${responseAxios.status} \nResponse ${JSON.stringify(responseAxios.data)}`,
         responseAxios.status,
         responseAxios.data,
         responseAxios.headers
@@ -259,9 +259,11 @@ class HTTPRequest {
  * ```
  */
 class TCRequest {
-  private profile: Profile;
-  private clientId: string;
+  profile?: Profile;
+  clientId?: string;
   private httpRequest: HTTPRequest;
+  token?: string;
+  region?: region;
   /**
    *
    * @param profile Profile to be considered while making request.
@@ -269,16 +271,37 @@ class TCRequest {
    * @param commandName Command which needs to make HTTP request.
    * @param pluginName Plugin to which command belongs.
    */
-  constructor(profile: Profile, clientId: string, commandName?: string, pluginName?: string) {
-    this.profile = profile;
-    this.clientId = clientId;
-    this.httpRequest = new HTTPRequest(commandName, pluginName);
+  constructor(profile: Profile, clientId: string, commandName?: string, pluginName?: string);
+
+  /**
+   *
+   * @param token OAuth token to interact with the TIBCO Cloud.
+   * @param region Region on the TIBCO Cloud.
+   * @param commandName Command which needs to make HTTP request.
+   * @param pluginName Plugin to which command belongs.
+   */
+  constructor(token: string, region: region, commandName?: string, pluginName?: string);
+
+  constructor(...args: any[]) {
+    if (typeof args[0] === 'object' && typeof args[1] === 'string') {
+      this.profile = args[0] as Profile;
+      this.clientId = args[1] as string;
+    } else if (typeof args[0] === 'string' && args[0] && typeof args[1] === 'string' && args[1]) {
+      this.token = args[0] as string;
+      this.region = args[1] as region;
+    } else {
+      throw new CLIBaseError('Invalid arguments passed to the TCRequest constructor');
+    }
+
+    this.httpRequest = new HTTPRequest(args[2], args[3]);
   }
 
   private addRegionToURL(url: string) {
     let u = new URL(url);
 
-    if (this.profile.region != 'us') {
+    if (this.region && this.region != 'us') {
+      u.hostname = this.region + '.' + u.hostname;
+    } else if (this.profile && this.profile.region != 'us') {
       u.hostname = this.profile.region + '.' + u.hostname;
     }
     return u.href;
@@ -289,11 +312,11 @@ class TCRequest {
     let cs = await secureStore.getClientSecret();
 
     if (rtExp < new Date().getTime()) {
-      throw new CLIBaseError(`Refresh token expired for profile ${this.profile}, try creating new profile`);
+      throw new CLIBaseError(`Refresh token expired for profile ${this.profile?.name}, try creating new profile`);
     }
 
     if (!rt) {
-      throw new CLIBaseError(`Could not find refresh token for profile ${this.profile.name}`);
+      throw new CLIBaseError(`Could not find refresh token for profile ${this.profile?.name}`);
     }
 
     if (!cs) {
@@ -303,7 +326,7 @@ class TCRequest {
     let formURLEncodedData = `refresh_token=${rt}&grant_type=refresh_token`;
 
     let basicAuth = {
-      username: this.clientId,
+      username: this.clientId as string,
       password: cs as string,
     };
 
@@ -316,7 +339,7 @@ class TCRequest {
     let atExp = new Date().getTime() + response.body.expires_in * 1000;
     rtExp = new Date().getTime() + response.body.refresh_token_expires_in * 1000;
 
-    secureStore.saveProfileSecrets(this.profile.name, {
+    await secureStore.saveProfileSecrets(this.profile?.name, {
       refreshToken: response.body.refresh_token,
       accessToken: response.body.access_token,
       accessTokenExp: atExp,
@@ -330,10 +353,13 @@ class TCRequest {
    * Validate existing token, will refresh if expired.
    * @returns Valid Token.
    */
-  async getValidToken() {
-    let secret = await secureStore.getProfileSecrets(this.profile.name);
+  async getValidToken(): Promise<string> {
+    if (this.token) return this.token;
+
+    let profileName = (this.profile as Profile).name;
+    let secret = await secureStore.getProfileSecrets(profileName);
     if (secret.accessTokenExp < new Date().getTime()) {
-      Logger.warn('Refreshing token');
+      Logger.debug('Refreshing token');
       return await this.renewToken(secret);
     }
     return secret.accessToken;

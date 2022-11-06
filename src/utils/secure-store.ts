@@ -14,7 +14,10 @@ const ACCOUNT = 'client-secret';
 
 const secureStore: any = {};
 
-secureStore.getProfileSecrets = async function(profName: string, secretType?: keyof ProfileSecrets){
+secureStore.getProfileSecrets = async function (
+  profName: string,
+  secretType?: keyof ProfileSecrets
+): Promise<ProfileSecrets | string> {
   let secrets = await keytar.getPassword(SERVICE, profName);
 
   if (!secrets) {
@@ -30,21 +33,20 @@ secureStore.getProfileSecrets = async function(profName: string, secretType?: ke
   }
 
   if (secretType && secrets != null) {
-    return secretsObj[secretType as any];
+    return secretsObj[secretType as any] as string;
   }
-  return secretsObj;
+  return secretsObj as ProfileSecrets;
+};
 
-}
-
-secureStore.getClientSecret = async function() {
+secureStore.getClientSecret = async function () {
   return keytar.getPassword(SERVICE, ACCOUNT);
-}
+};
 
-secureStore.saveClientSecret = async function(clientSecret: string) {
+secureStore.saveClientSecret = async function (clientSecret: string) {
   return keytar.setPassword(SERVICE, ACCOUNT, clientSecret);
-}
+};
 
-secureStore.saveProfileSecrets = async function(profName: string, secrets: ProfileSecrets) {
+secureStore.saveProfileSecrets = async function (profName: string, secrets: ProfileSecrets) {
   let currSecrets;
   try {
     currSecrets = await this.getProfileSecrets(profName);
@@ -54,22 +56,20 @@ secureStore.saveProfileSecrets = async function(profName: string, secrets: Profi
 
   if (typeof currSecrets === 'object') {
     newSecrets = { ...currSecrets, ...secrets };
-    Logger.warn('Profile secret already existed, new secrets will replace existing ones');
+    Logger.debug('Profile secret already existed, new secrets will replace existing ones');
   } else {
     newSecrets = secrets;
   }
 
   await keytar.setPassword(SERVICE, profName, JSON.stringify(newSecrets));
-}
+};
 
-secureStore.removeProfileSecrets = async function(profile: string) {
+secureStore.removeProfileSecrets = async function (profile: string) {
   return keytar.deletePassword(SERVICE, profile);
-}
+};
 
-
-secureStore.removeClientSecret = async function() {
+secureStore.removeClientSecret = async function () {
   return keytar.deletePassword(SERVICE, ACCOUNT);
-}
-
+};
 
 export { secureStore };

@@ -9,7 +9,7 @@ import * as sinon from 'sinon';
 const MD5String = require('../helper/MD5String');
 import * as multipart from 'parse-multipart-data';
 import * as chaiAsPromised from 'chai-as-promised';
-import { HTTPError } from '../../src/index';
+import { HTTPError, secureStore } from '../../src/index';
 import * as nock from 'nock';
 import { HTTPRequest, TCRequest } from '../../src/utils/request';
 import * as tmp from 'tmp';
@@ -17,6 +17,7 @@ import * as md5 from 'md5-file';
 import * as os from 'os';
 
 import * as path from 'path';
+
 chai.use(chaiAsPromised);
 let testUrl = 'http://www.myapi.com';
 describe('utils', () => {
@@ -51,17 +52,18 @@ describe('utils', () => {
       it('throw HTTP Error if client side or server side error', () => {
         nock(testUrl).get('/tci/v1/apps').reply(401, 'Failed');
         let req = new HTTPRequest();
-        expect(req.doRequest('/tci/v1/apps', { baseURL: testUrl }))
-          .to.be.eventually.rejectedWith(HTTPError)
-          .and.has.property('httpCode', 401)
-          .and.property('data', 'Failed');
+        return expect(req.doRequest('/tci/v1/apps', { baseURL: testUrl })).to.be.eventually.rejected.and.has.property(
+          'httpCode',
+          401
+        );
       });
       it('throw Error for a request timeout', async () => {
         nock(testUrl).get('/tci/v1/apps').delay(31000).reply(200, 'Success');
         let req = new HTTPRequest();
-        expect(req.doRequest('/tci/v1/apps', { baseURL: testUrl }))
-          .to.be.eventually.rejectedWith(Error)
-          .and.has.property('message', 'timeout of 30000ms exceeded');
+        return expect(req.doRequest('/tci/v1/apps', { baseURL: testUrl })).to.be.eventually.rejected.and.has.property(
+          'message',
+          'timeout of 30000ms exceeded'
+        );
       });
       it('receive appropriate User Agent', async () => {
         let s = nock(testUrl)
@@ -101,7 +103,7 @@ describe('utils', () => {
 
         let req = new HTTPRequest();
         let resp = req.download('/v1/data', path.join('a', 'b', 'c'), { baseURL: testUrl }, false);
-        expect(resp).to.be.rejectedWith(Error);
+        return expect(resp).to.be.rejectedWith(Error);
       });
     });
 
@@ -114,26 +116,25 @@ describe('utils', () => {
 
             let parts = multipart.parse(Buffer.from(body as string, 'utf-8'), boundary);
 
-            if (parts[0].name === 'file' && parts[0].data.toString() === 'ok') {
-              return [201];
+            if (parts[0].name != 'file' && parts[0].data.toString() != 'ok') {
+              return [400];
             }
 
-            if (
-              MD5String(parts[1].data.toString()) === md5.sync(path.join(__dirname, './sample-data.json')) &&
-              parts[1].name === 'path'
-            ) {
-              return [201];
+            if (MD5String(parts[1].data.toString()) != md5.sync(path.join(__dirname, './sample-data.json'))) {
+              return [400];
             }
-            return [400];
+            return [201];
           });
         let req = new HTTPRequest();
-        let resp = await req.upload(
-          '/v1/file',
-          { file: 'ok', path: 'file://' + path.join(__dirname, './sample-data.json') },
-          { baseURL: testUrl },
-          false
-        );
-        expect(resp.statusCode).to.be.equal(201);
+
+        return expect(
+          req.upload(
+            '/v1/file',
+            { file: 'ok', path: 'file://' + path.join(__dirname, './sample-data.json') },
+            { baseURL: testUrl },
+            false
+          )
+        ).to.eventually.have.property('statusCode', 201);
       });
     });
 
@@ -149,18 +150,105 @@ describe('utils', () => {
   });
 
   describe('TIBCO Cloud HTTP Requests', () => {
+    describe('TCRequest Constructor', () => {
+      it('should create an object with profile and clientId as not null properties', () => {
+        let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, 'testClientId');
+        expect(req.profile).is.deep.equal({ name: 'test', org: 'acme', region: 'eu' });
+        expect(req.clientId).to.be.equal('testClientId');
+        expect(req.token).to.be.undefined;
+        expect(req.region).to.be.undefined;
+      });
+
+      it('should return an object with token and region as not null properties', () => {
+        let req = new TCRequest('tk.asdfj', 'eu');
+        expect(req.token).to.be.equal('tk.asdfj');
+        expect(req.region).to.be.equal('eu');
+        expect(req.profile).is.undefined;
+        expect(req.clientId).is.undefined;
+      });
+
+      it('should throw error if not passed appropriate parameters', () => {
+        expect(() => {
+          new TCRequest('', 'eu');
+        }).to.throw('Invalid arguments passed to the TCRequest constructor');
+      });
+    });
+
+    describe('getValidToken', () => {
+      let sbox: sinon.SinonSandbox;
+      beforeEach(() => {
+        sbox = sinon.createSandbox();
+      });
+      afterEach(() => {
+        sbox.restore();
+      });
+
+      it('should return token property if is it not null', async () => {
+        let req = new TCRequest('tk.asdfj', 'eu');
+        let token = await req.getValidToken();
+        expect(token).to.be.equal('tk.asdfj');
+      });
+
+      it('should return profile token if property token is null', async () => {
+        let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, 'testClientId');
+        sbox.stub(secureStore, 'getProfileSecrets').returns({
+          accessToken: 'abcd',
+          refreshToken: 'qwerty',
+          accessTokenExp: new Date().getTime() + 10000,
+          refreshTokenExp: new Date().getTime() + 10000,
+        });
+        let token = await req.getValidToken();
+        expect(token).to.be.equal('abcd');
+      });
+
+      it('should renew token if profile token is expired', async () => {
+        let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, 'testClientId');
+
+        sbox.stub(secureStore, 'getProfileSecrets').returns({
+          accessToken: 'abcd',
+          refreshToken: 'qwerty',
+          accessTokenExp: new Date().getTime() - 10000,
+          refreshTokenExp: new Date().getTime() + 10000,
+        });
+
+        let s = sbox.stub(TCRequest.prototype, <any>'renewToken');
+        await req.getValidToken();
+        expect(s.callCount).to.be.equal(1);
+      });
+
+      it('should throw error if refreshToken is expired', () => {
+        let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, 'testClientId');
+
+        sbox.stub(secureStore, 'getProfileSecrets').returns({
+          accessToken: 'abcd',
+          refreshToken: 'qwerty',
+          accessTokenExp: new Date().getTime() - 100000,
+          refreshTokenExp: new Date().getTime() - 100000,
+        });
+
+        sbox.stub(secureStore, 'getClientSecret').returns('cs.asdf');
+        return expect(req.getValidToken()).to.eventually.be.rejected;
+      });
+    });
     describe('getUrlAndOptions', () => {
-      it('Add region to the url and token to the header', async () => {
+      let sbox: sinon.SinonSandbox;
+      beforeEach(() => {
+        sbox = sinon.createSandbox();
+      });
+      afterEach(() => {
+        sinon.restore();
+      });
+      it('Add region to the url parameter and token to the header', async () => {
         let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, '');
-        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+        sbox.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
 
         let { newURL, newOptions } = await req.getUrlAndOptions('https://api.cloud.tibco.com', {});
         expect(newURL).to.be.equal('https://eu.api.cloud.tibco.com/');
         expect(newOptions?.headers?.Authorization).to.be.equal('Bearer rt.asdf');
       });
-      it('Add region to the baseUrl and token to the header', async () => {
+      it('Add region to the baseUrl property of options parameter and token to the header', async () => {
         let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, '');
-        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+        sbox.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
 
         let { newURL, newOptions } = await req.getUrlAndOptions('/v1/tci/apps', {
           baseURL: 'https://api.cloud.tibco.com/',
@@ -171,7 +259,7 @@ describe('utils', () => {
       });
       it('should not add region to the baseUrl if the region is "us"', async () => {
         let req = new TCRequest({ name: 'test', org: 'acme', region: 'us' }, '');
-        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+        sbox.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
 
         let { newURL, newOptions } = await req.getUrlAndOptions('/v1/tci/apps', {
           baseURL: 'https://api.cloud.tibco.com/',
@@ -182,7 +270,7 @@ describe('utils', () => {
       });
       it('should not add region to the url if the region is "us"', async () => {
         let req = new TCRequest({ name: 'test', org: 'acme', region: 'us' }, '');
-        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+        sbox.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
 
         let { newURL, newOptions } = await req.getUrlAndOptions('https://api.cloud.tibco.com/', {});
         expect(newURL).to.be.equal('https://api.cloud.tibco.com/');
@@ -190,7 +278,7 @@ describe('utils', () => {
       });
       it('should add baseUrl if only path is passed as parameters', async () => {
         let req = new TCRequest({ name: 'test', org: 'acme', region: 'eu' }, '');
-        sinon.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
+        sbox.stub(req, 'getValidToken').returns(Promise.resolve('rt.asdf'));
 
         let { newURL, newOptions } = await req.getUrlAndOptions('/v1/tci/apps', {});
         expect(newOptions.baseURL).to.be.equal('https://eu.api.cloud.tibco.com/');

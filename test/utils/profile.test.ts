@@ -6,6 +6,8 @@
 import { ProfileConfigManager, ProfileConfig } from '../../src/utils/profile';
 import { BaseCommand, CLIBaseError, HTTPRequest, Profile, secureStore } from '../../src';
 import { expect, test } from '@oclif/test';
+import * as chaiAsPromised from 'chai-as-promised';
+import * as chai from 'chai';
 
 import * as sinon from 'sinon';
 import * as fs from 'fs-extra';
@@ -13,40 +15,48 @@ import * as tmp from 'tmp';
 import * as path from 'path';
 import { setCommand } from '../../src/utils/log';
 
+chai.use(chaiAsPromised);
+
 describe('utils', () => {
   describe('profiles', () => {
+    let dir: tmp.DirResult;
     describe('ProfileConfig Manager', () => {
+      beforeEach(() => {
+        dir = tmp.dirSync();
+      });
+
+      afterEach(() => {
+        tmp.setGracefulCleanup();
+      });
+
       test.it('create & save config data in a file when file does not exist', () => {
-        let dir = tmp.dirSync();
         let configManager = new ProfileConfigManager(dir.name);
         let config = new ProfileConfig('cid', '1.0.0', 'default_user', []);
         configManager.save(config);
         expect(fs.existsSync(path.join(dir.name, 'profile.json'))).to.equal(true);
         expect(fs.readJsonSync(path.join(dir.name, 'profile.json'))).to.deep.equal(config);
-        tmp.setGracefulCleanup();
       });
+
       test.it('should give error when saving a null/unloaded config', () => {
-        let dir = tmp.dirSync();
         let configManager = new ProfileConfigManager(dir.name);
-        expect(configManager.save).to.throw(Error);
-        tmp.setGracefulCleanup();
+        expect(() => configManager.save()).to.throw(Error);
       });
 
       describe('ProfileConfigManager.load', () => {
         let config: any, configManager: ProfileConfigManager, dir: tmp.DirResult;
 
-        before(() => {
+        beforeEach(() => {
           dir = tmp.dirSync();
           configManager = new ProfileConfigManager(dir.name);
           config = new ProfileConfig('cid', '1.0.0', 'default_user', []);
         });
 
-        after(() => {
+        afterEach(() => {
           tmp.setGracefulCleanup();
         });
 
         test.it('give error when config file not found', () => {
-          expect(configManager.getConfig).to.throw(Error);
+          expect(() => configManager.getConfig()).to.throw(Error);
         });
 
         test.it('load config data from a file', () => {
@@ -104,9 +114,7 @@ describe('utils', () => {
         test.it('Should throw error if details are insufficient', () => {
           let config = new ProfileConfig('cid', '1.0.0', 'default_user', []);
           let prof: Profile = { name: '', org: '', region: 'eu' };
-          expect(() => {
-            config.addProfile(prof, secrets);
-          }).to.throw(Error);
+          expect(() => config.addProfile(prof, secrets)).to.throw(Error);
         });
       });
       describe('Config.getProfile', () => {
@@ -125,9 +133,7 @@ describe('utils', () => {
           expect(config.getProfileByName()).to.be.equal(profile2);
         });
         test.it('should throw error if profile not found', () => {
-          expect(() => {
-            config.getProfileByName('dummy_profile');
-          }).to.throw(Error);
+          expect(() => config.getProfileByName('dummy_profile')).to.throw(Error);
         });
       });
 

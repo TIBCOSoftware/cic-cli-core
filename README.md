@@ -1,7 +1,7 @@
 # CLI Core for TIBCO Cloud™
 
 If you want to develop a CLI plugin for TIBCO Cloud™, use this package to get some features OOTB.
-Using this package won't only give features but will help in maintaining a unified, consistent user experience for the end user.
+Using this package won't only give you features but will also help in maintaining a unified, consistent user experience for the end user.
 
 ## Table of Contents
 
@@ -95,8 +95,21 @@ export default class GenDirCommand extends BaseCommand {
   async run() {
     // Write your logic here
 
-    // If want to make any http requests to 3rd party tools
+    // to make any http requests to 3rd party tools
     let httpReq = this.getHTTPRequest();
+
+    // get Plugin Config Object
+    let config = this.getPluginConfig();
+
+    // to get Plugin Config's property
+    config.get("property");
+
+    // to set Plugin Config's property
+    config.set("count", 2, { source: "local" });
+
+    // to delete Plugin Config's property
+    config.delete('count', { source: "local" });
+    
   }
 
   async catch(err: Error) {
@@ -151,13 +164,13 @@ export default class ShowAppsCommand extends TCBaseCommand {
     // to make any http requests to TIBCO Cloud
     let tcReq = this.getTCRequest();
 
-    // to read Config
+    // to read Profile Config
     let config = this.getProfileConfig();
 
-    // to save config
+    // to save Profileconfig
     this.saveProfileConfig(config);
 
-    // to reload config
+    // to reload Profile config
     this.reloadProfileConfig();
   }
 
@@ -215,8 +228,8 @@ debug("My debugging namespace");
 
 Use `CLIBaseError` class to throw errors. These errors are friendly and won't show a traceback unless debugging is enabled with env variable `DEBUG=*` or `CLI_NAME_DEBUG=1`.
 
-You can extend `CLIBaseError` class to create more error classes.
-For e.g. we created HTTPError class
+You can extend `CLIBaseError` class to create more error classes.  \
+For E.g.: We created `HTTPError` class
 
 ```ts
 export class HTTPError extends CLIBaseError {

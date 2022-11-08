@@ -25,7 +25,7 @@ export class TCBaseCommand extends BaseCommand {
       description: 'Switch to different org or region using profile.',
     }),
     token: flags.string({
-      description: 'OAuth token to interact with the TIBCO cloud.(Should pass region flag with this flag)',
+      description: 'OAuth token to interact with the TIBCO cloud.(Should pass region flag with the token flags)',
       env: 'TIBCO_CLI_OAUTH_TOKEN',
       dependsOn: ['region'],
     }),

@@ -649,23 +649,11 @@ req.doRequest('/cic/v1/apps/',{},'mydata'); //if prof has eu region then URL wou
 **Kind**: global class  
 
 * [TCRequest](#TCRequest)
-    * [new TCRequest(profile, clientId, commandName, pluginName)](#new_TCRequest_new)
     * [.getValidToken()](#TCRequest+getValidToken) ⇒
     * [.getAxiosClient(baseURL)](#TCRequest+getAxiosClient) ⇒
     * [.doRequest(url, options, data)](#TCRequest+doRequest) ⇒
     * [.download(url, pathToStore, options, showProgressBar)](#TCRequest+download) ⇒
     * [.upload(url, data, options, showProgressBar)](#TCRequest+upload) ⇒
-
-<a name="new_TCRequest_new"></a>
-
-### new TCRequest(profile, clientId, commandName, pluginName)
-
-| Param | Description |
-| --- | --- |
-| profile | Profile to be considered while making request. |
-| clientId | ClientId of a CLI. |
-| commandName | Command which needs to make HTTP request. |
-| pluginName | Plugin to which command belongs. |
 
 <a name="TCRequest+getValidToken"></a>
 

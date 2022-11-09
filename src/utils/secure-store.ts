@@ -7,7 +7,7 @@
 import * as keytar from 'keytar';
 import { CLIBaseError } from '..';
 import { ProfileSecrets } from '../models/models';
-import { Logger } from './log';
+const debug = require('debug')('@tibco-software/cic-cli-core:secure-store');
 
 const SERVICE = 'tibco-cli';
 const ACCOUNT = 'client-secret';
@@ -21,7 +21,7 @@ secureStore.getProfileSecrets = async function (
   let secrets = await keytar.getPassword(SERVICE, profName);
 
   if (!secrets) {
-    throw new CLIBaseError('Profile secrets could not be found');
+    throw new CLIBaseError(`Profile secrets couldn't be found`);
   }
 
   let secretsObj;
@@ -56,7 +56,7 @@ secureStore.saveProfileSecrets = async function (profName: string, secrets: Prof
 
   if (typeof currSecrets === 'object') {
     newSecrets = { ...currSecrets, ...secrets };
-    Logger.debug('Profile secret already existed, new secrets will replace existing ones');
+    debug('Profile secrets already existed, new secrets will replace existing ones');
   } else {
     newSecrets = secrets;
   }

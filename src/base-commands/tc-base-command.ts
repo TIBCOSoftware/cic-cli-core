@@ -22,7 +22,7 @@ export class TCBaseCommand extends BaseCommand {
   static flags = {
     ...BaseCommand.flags,
     profile: flags.string({
-      description: 'Switch to different org or region using profile.',
+      description: 'Switch to a different organization or region using profile',
     }),
     token: flags.string({
       description: 'OAuth token to interact with the TIBCO cloud.(Should pass region flag with the token flags)',

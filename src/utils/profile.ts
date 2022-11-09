@@ -41,7 +41,7 @@ export class ProfileConfig {
    */
   addProfile(profile: Profile, secrets: ProfileSecrets) {
     if (this.validateProfile(profile, secrets) == false) {
-      throw new CLIBaseError('Could not add profile. Either properties are missing or empty');
+      throw new CLIBaseError(`Profile couldn't be added because properties are missing or empty`);
     }
 
     let existing;
@@ -51,7 +51,7 @@ export class ProfileConfig {
     if (existing) {
       existing.org = profile.org;
       existing.region = profile.region;
-      Logger.warn(`Replacing profile ${profile.name} details`);
+      Logger.warn(`Replacing the profile ${profile.name} details`);
     } else {
       this.profiles.push(profile);
     }
@@ -68,7 +68,7 @@ export class ProfileConfig {
     name = name || this.defaultProfile;
     let profile = this.profiles.find((p: Profile) => p.name === name);
     if (!profile) {
-      throw new CLIBaseError(`Profile ${name} could not be found`);
+      throw new CLIBaseError(`Profile ${name} couldn't be found`);
     }
     return profile;
   }
@@ -80,7 +80,7 @@ export class ProfileConfig {
    */
   async removeProfile(name: string) {
     if (name == this.defaultProfile) {
-      throw new CLIBaseError('Cannot remove default profile');
+      throw new CLIBaseError('Cannot remove the default profile');
     }
     this.getProfileByName(name);
     let token = await secureStore.getProfileSecrets(name, 'accessToken');
@@ -124,7 +124,7 @@ export class ProfileConfigManager {
    */
   save(config?: ProfileConfig) {
     if (!config && !profConfig) {
-      throw new CLIBaseError('Configuration was not loaded to save');
+      throw new CLIBaseError('Profile configuration was not loaded to save');
     }
     fs.outputJSONSync(this.filePath, config || profConfig, {
       spaces: '\t',
@@ -137,7 +137,7 @@ export class ProfileConfigManager {
       dataObj = fs.readJSONSync(this.filePath);
     } catch (err) {
       // Logger.debug(err);
-      throw new CLIBaseError('Could not find config file, try initializing CLI');
+      throw new CLIBaseError(`Config file couldn't be found. Try initializing the CLI`);
     }
 
     return new ProfileConfig(

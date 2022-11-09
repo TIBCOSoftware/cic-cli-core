@@ -4,7 +4,8 @@
         "TIBCO_ACC": "https://account.cloud.tibco.com"
     },
     "PATHS":{
-        "REVOKE_TOKEN":"/idm/v1/oauth2/tokens/operations/revoke"
+        "REVOKE_TOKEN":"/idm/v1/oauth2/tokens/operations/revoke",
+        "REFRESH_TOKEN":"/idm/v1/oauth2/token"
     },
     "CONSTANTS":{
         "PLUGIN_CONFIG_FILE_NAME":"tibco-cli-config.ini",

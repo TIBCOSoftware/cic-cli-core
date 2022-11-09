@@ -24,7 +24,7 @@ export class BaseCommand extends Command {
 
   static flags = {
     'no-warnings': flags.boolean({
-      description: `Disable warnings from command's output`,
+      description: `Disable warnings from command output`,
       default: false,
     }),
     config: flags.string({

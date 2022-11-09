@@ -34,7 +34,6 @@ function showTableFromTobject(tObject: any, title?: string) {
     topRight = '╣';
   }
   let { colNames, colAlignArray, maxColLengthObject } = getColNamesAndWidth(tObject);
-  console.log(maxColLengthObject);
 
   let tableWidth = 3;
   const colWidthsArray: number[] = [];

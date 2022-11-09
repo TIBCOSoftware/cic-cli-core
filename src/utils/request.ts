@@ -143,7 +143,7 @@ class HTTPRequest {
     let totalLen = response.headers['content-length'];
     if (!totalLen) {
       if (showProgressBar === true) {
-        Logger.warn('Could not show progress bar since no content length provided');
+        Logger.warn(`Progress bar can't be displayed because the file's content length is unknown`);
       }
       showProgressBar = false;
     }
@@ -312,15 +312,15 @@ class TCRequest {
     let cs = await secureStore.getClientSecret();
 
     if (rtExp < new Date().getTime()) {
-      throw new CLIBaseError(`Refresh token expired for profile ${this.profile?.name}, try creating new profile`);
+      throw new CLIBaseError(`Refresh token expired for the profile ${this.profile?.name}, try creating a new profile`);
     }
 
     if (!rt) {
-      throw new CLIBaseError(`Could not find refresh token for profile ${this.profile?.name}`);
+      throw new CLIBaseError(`Refresh token couldn't be found for profile ${this.profile?.name}`);
     }
 
     if (!cs) {
-      throw new CLIBaseError('Could not find client secret');
+      throw new CLIBaseError(`Client secret couldn't be found`);
     }
 
     let formURLEncodedData = `refresh_token=${rt}&grant_type=refresh_token`;
@@ -331,7 +331,7 @@ class TCRequest {
     };
 
     let response = await this.httpRequest.doRequest(
-      '/idm/v1/oauth2/token',
+      CORE_CONFIG.PATHS.REFRESH_TOKEN,
       { method: 'POST', baseURL: REFRESH_TOKEN_BASE_URL, auth: basicAuth },
       formURLEncodedData
     );

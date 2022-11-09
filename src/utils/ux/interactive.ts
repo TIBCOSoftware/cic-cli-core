@@ -7,6 +7,8 @@
 import { Choice } from '../../models/models';
 import { Logger } from '../log';
 
+const debug = require('debug')('@tibco-software/cic-cli-core:ux:interactive');
+
 /**
  * Prompt a question on the terminal.
  * @memberof module:ux
@@ -22,7 +24,7 @@ export async function prompt(question: string, type: 'input' | 'password' = 'inp
     let re = await prompt({ type: type, name: 'result', message: question });
     return re.result;
   } else {
-    Logger.log('Using answer (' + answer + ') for question: ' + question);
+    debug('Using answer (' + answer + ') for question: ' + question);
     return answer;
   }
 }
@@ -50,7 +52,7 @@ export async function promptChoices(question: string, choices: Choice[], answer?
     });
     return prompt.run();
   } else {
-    Logger.log('Using answer (' + answer + ') for question: ' + question);
+    debug('Using answer (' + answer + ') for question: ' + question);
     return answer;
   }
 }
@@ -78,7 +80,7 @@ export async function promptChoicesWithSearch(question: string, choices: Choice[
     });
     return await prompt.run();
   } else {
-    Logger.log('Using answer (' + answer + ') for question: ' + question);
+    debug('Using answer (' + answer + ') for question: ' + question);
     return answer;
   }
 }
@@ -94,7 +96,7 @@ export async function promptChoicesWithSearch(question: string, choices: Choice[
  */
 export async function promptMultiSelectChoices(question: string, choices: Choice[], answer?: string[]) {
   if (answer) {
-    Logger.log('Using answer (' + answer + ') for question: ' + question);
+    debug('Using answer (' + answer + ') for question: ' + question);
     return answer;
   }
 
